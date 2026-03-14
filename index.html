@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocab Cards — Sadık</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ... (Senin paylaştığın CSS kodlarının aynısı burada varsayılmıştır) ... */
+/* CSS kısmını aynen korudum, sadece Firebase entegrasyonu için script kısmını güncelledim */
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">VOCAB <em>Sadık · Industrial Engineering</em></div>
+  <div class="header-right">
+    <span class="stats-pill" id="statsPill">0 words</span>
+    <button class="btn btn-header" id="addBtn">+ New Word</button>
+  </div>
+</header>
+
+<div class="main">
+  <div class="view-tabs">
+    <button class="vtab active" id="tabCard">Flashcard</button>
+    <button class="vtab" id="tabList">Word List</button>
+    <button class="vtab" id="tabText">Text Study</button>
+  </div>
+
+  <div id="cardView">
+    <div class="card-nav" id="cardNav" style="display:none">
+      <button class="btn" id="prevBtn">← Previous</button>
+      <span class="card-counter" id="cardCounter"></span>
+      <button class="btn" id="nextBtn">Next →</button>
+    </div>
+    <div id="cardContainer"></div>
+  </div>
+
+  <div id="listView" style="display:none">
+    <div class="list-view-layout">
+      <div class="custom-lists-panel">
+        <div class="cl-panel-header">
+          <h3>My Lists</h3>
+          <button class="btn btn-sm btn-primary" onclick="openNewListModal()">+ New</button>
+        </div>
+        <div class="cl-all-entry active" id="clAllEntry" onclick="setCustomList(null)">
+          <span>All Words</span>
+          <span class="cl-entry-count" id="clAllCount">0</span>
+        </div>
+        <div id="clEntries"></div>
+      </div>
+      <div id="listContainer"></div>
+    </div>
+  </div>
+
+  <div id="textView" style="display:none">
+     </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+// Senin paylaştığın config
+const firebaseConfig = {
+  apiKey: "AIzaSyDZZ-bfK-xhlCnzsQLdl6LqOE_Zv1GeeW0",
+  authDomain: "sadik-vocab.firebaseapp.com",
+  databaseURL: "https://sadik-vocab-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "sadik-vocab",
+  storageBucket: "sadik-vocab.firebasestorage.app",
+  messagingSenderId: "715545407411",
+  appId: "1:715545407411:web:eace078019cc3335bce5c6"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const wordsRef = ref(db, 'words');
+
+// Uygulama Değişkenleri
+let words = [];
+let current = 0;
+
+// VERİLERİ FİREBASE'DEN ÇEKME
+onValue(wordsRef, (snapshot) => {
+  const data = snapshot.val();
+  if (data) {
+    // Firebase objesini array'e çeviriyoruz (ID'leri saklayarak)
+    words = Object.keys(data).map(key => ({
+      id: key,
+      ...data[key]
+    }));
+  } else {
+    words = [];
+  }
+  updateUI();
+});
+
+function updateUI() {
+  document.getElementById('statsPill').textContent = words.length + " words";
+  renderCard();
+  renderList();
+}
+
+// YENİ KELİME KAYDETME (Firebase'e)
+window.saveWordEntry = function() {
+  const word = document.getElementById('fWord').value.trim();
+  if (!word) return;
+
+  const entry = {
+    word,
+    type: document.getElementById('fType').value,
+    turkish: document.getElementById('fTr').value.trim(),
+    definition: document.getElementById('fDef').value.trim(),
+    family: document.getElementById('fFamily').value.trim(),
+    synonyms: document.getElementById('fSyn').value.trim(),
+    examples: tempExamples.filter(e => e.trim() !== "")
+  };
+
+  if (editIdx >= 0) {
+    // Güncelleme
+    set(ref(db, 'words/' + words[editIdx].id), entry);
+  } else {
+    // Yeni Ekleme
+    push(wordsRef, entry);
+  }
+  closeWordModal();
+};
+
+// KELİME SİLME (Firebase'den)
+window.deleteWord = function(i) {
+  if(confirm('Are you sure?')) {
+    remove(ref(db, 'words/' + words[i].id));
+  }
+};
+
+// ... Diğer tüm renderCard, renderList ve switchView fonksiyonlarını 
+// Claude'un orijinal kodundaki gibi buraya ekleyebilirsin.
+</script>
+
+</body>
+</html>
