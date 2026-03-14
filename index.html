@@ -6,8 +6,540 @@
 <title>Vocab Cards — Sadık</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ... (Senin paylaştığın CSS kodlarının aynısı burada varsayılmıştır) ... */
-/* CSS kısmını aynen korudum, sadece Firebase entegrasyonu için script kısmını güncelledim */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:   #1a2744;
+  --blue:   #2451a6;
+  --blue2:  #3a6fd8;
+  --teal:   #1d7a6e;
+  --teal2:  #25a090;
+  --amber:  #c47c1a;
+  --amber2: #e8961f;
+  --rose:   #a63040;
+  --purple: #6b3fa0;
+  --purple2:#8b5cc8;
+  --bg:     #f4f6fb;
+  --surface:#ffffff;
+  --border: #dde3f0;
+  --border2:#c2cce0;
+  --text:   #1a2744;
+  --text2:  #4a5878;
+  --text3:  #8a96b0;
+  --shadow: 0 4px 24px rgba(26,39,68,0.10);
+  --shadow2:0 2px 8px rgba(26,39,68,0.07);
+}
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* HEADER */
+header { background:var(--navy); padding:0.85rem 2rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+.logo { font-family:'Playfair Display',serif; font-size:18px; color:#fff; letter-spacing:0.04em; }
+.logo em { font-family:'Inter',sans-serif; font-style:normal; font-size:11px; color:rgba(255,255,255,0.45); font-weight:300; margin-left:10px; }
+.header-right { display:flex; gap:8px; align-items:center; }
+.stats-pill { font-size:11px; color:rgba(255,255,255,0.6); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:3px 12px; }
+
+/* BUTTONS */
+.btn { font-family:'Inter',sans-serif; font-size:12px; font-weight:500; padding:7px 16px; border-radius:8px; border:1px solid var(--border2); background:transparent; color:var(--text); cursor:pointer; transition:all 0.15s; }
+.btn:hover { background:var(--border); }
+.btn:active { transform:scale(0.97); }
+.btn-primary { background:var(--blue); color:#fff; border-color:var(--blue); }
+.btn-primary:hover { background:var(--blue2); border-color:var(--blue2); }
+.btn-header { background:rgba(255,255,255,0.1); color:#fff; border-color:rgba(255,255,255,0.25); }
+.btn-header:hover { background:rgba(255,255,255,0.2); }
+.btn-sm { font-size:11px; padding:5px 12px; }
+.btn-danger { color:var(--rose); border-color:#f0c0c8; }
+.btn-danger:hover { background:#fff0f2; }
+.btn-purple { background:var(--purple); color:#fff; border-color:var(--purple); }
+.btn-purple:hover { background:var(--purple2); border-color:var(--purple2); }
+
+/* MAIN */
+.main { max-width:900px; margin:0 auto; padding:2rem 1.5rem; }
+
+/* TABS */
+.view-tabs { display:flex; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:3px; width:fit-content; margin-bottom:2rem; box-shadow:var(--shadow2); }
+.vtab { font-family:'Inter',sans-serif; font-size:12px; font-weight:500; padding:7px 22px; border-radius:9px; border:none; background:transparent; color:var(--text3); cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+.vtab.active { background:var(--navy); color:#fff; }
+
+/* CARD NAV */
+.card-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+.card-counter { font-size:13px; color:var(--text3); }
+.card-counter strong { color:var(--navy); font-weight:600; }
+
+/* ══════════════════════════════════════════════
+   TYPE THEME SYSTEM
+   noun        → deep blue   #1e3a8a / #3b82f6
+   verb        → forest green #14532d / #22c55e
+   adjective   → rich amber  #78350f / #f59e0b
+   adverb      → deep rose   #881337 / #f43f5e
+   phrasal verb→ violet      #4c1d95 / #8b5cf6
+   other/—     → slate navy  (default)
+══════════════════════════════════════════════ */
+
+/* theme data maps (used via JS data-type attr) */
+.flashcard { background:var(--surface); border-radius:20px; box-shadow:var(--shadow); overflow:hidden; margin-bottom:1.5rem; transition:border-color 0.3s; }
+
+/* NOUN — deep sapphire blue */
+.flashcard[data-type="noun"] { border:1.5px solid #bfdbfe; }
+.flashcard[data-type="noun"] .card-stripe { background:linear-gradient(90deg,#1e3a8a,#3b82f6,#93c5fd); }
+.flashcard[data-type="noun"] .card-hero  { background:linear-gradient(160deg,#eff6ff 0%,#dbeafe 100%); border-bottom:1px solid #bfdbfe; }
+.flashcard[data-type="noun"] .hero-label { color:#3b82f6; }
+.flashcard[data-type="noun"] .hero-word  { color:#1e3a8a; }
+.flashcard[data-type="noun"] .type-badge { background:#1e3a8a; color:#fff; border-color:#1e3a8a; }
+.flashcard[data-type="noun"] .hero-shape { background:rgba(59,130,246,0.08); }
+.flashcard[data-type="noun"] .col-label.wf  { color:#1d4ed8; }
+.flashcard[data-type="noun"] .col-label.wf  .col-label-dot { background:#3b82f6; }
+.flashcard[data-type="noun"] .col-label.syn { color:#1e40af; }
+.flashcard[data-type="noun"] .col-label.syn .col-label-dot { background:#60a5fa; }
+.flashcard[data-type="noun"] .wf-row  .word-row-marker { color:#3b82f6; }
+.flashcard[data-type="noun"] .syn-row .word-row-marker { color:#60a5fa; }
+.flashcard[data-type="noun"] .word-row:hover { background:#eff6ff; border-color:#bfdbfe; }
+.flashcard[data-type="noun"] .examples-section { background:#f0f7ff; }
+.flashcard[data-type="noun"] .examples-label { color:#1d4ed8; }
+.flashcard[data-type="noun"] .examples-label .col-label-dot { background:#3b82f6; }
+.flashcard[data-type="noun"] .example-item { border-left-color:#3b82f6; }
+.flashcard[data-type="noun"] .example-num { color:#1d4ed8; }
+.flashcard[data-type="noun"] .notes-textarea:focus { border-color:#3b82f6; }
+
+/* VERB — forest emerald green */
+.flashcard[data-type="verb"] { border:1.5px solid #bbf7d0; }
+.flashcard[data-type="verb"] .card-stripe { background:linear-gradient(90deg,#14532d,#16a34a,#86efac); }
+.flashcard[data-type="verb"] .card-hero  { background:linear-gradient(160deg,#f0fdf4 0%,#dcfce7 100%); border-bottom:1px solid #bbf7d0; }
+.flashcard[data-type="verb"] .hero-label { color:#16a34a; }
+.flashcard[data-type="verb"] .hero-word  { color:#14532d; }
+.flashcard[data-type="verb"] .type-badge { background:#14532d; color:#fff; border-color:#14532d; }
+.flashcard[data-type="verb"] .col-label.wf  { color:#15803d; }
+.flashcard[data-type="verb"] .col-label.wf  .col-label-dot { background:#22c55e; }
+.flashcard[data-type="verb"] .col-label.syn { color:#166534; }
+.flashcard[data-type="verb"] .col-label.syn .col-label-dot { background:#4ade80; }
+.flashcard[data-type="verb"] .wf-row  .word-row-marker { color:#22c55e; }
+.flashcard[data-type="verb"] .syn-row .word-row-marker { color:#4ade80; }
+.flashcard[data-type="verb"] .word-row:hover { background:#f0fdf4; border-color:#bbf7d0; }
+.flashcard[data-type="verb"] .examples-section { background:#f0fdf6; }
+.flashcard[data-type="verb"] .examples-label { color:#15803d; }
+.flashcard[data-type="verb"] .examples-label .col-label-dot { background:#22c55e; }
+.flashcard[data-type="verb"] .example-item { border-left-color:#22c55e; }
+.flashcard[data-type="verb"] .example-num { color:#15803d; }
+.flashcard[data-type="verb"] .notes-textarea:focus { border-color:#22c55e; }
+
+/* ADJECTIVE — warm amber gold */
+.flashcard[data-type="adjective"] { border:1.5px solid #fde68a; }
+.flashcard[data-type="adjective"] .card-stripe { background:linear-gradient(90deg,#78350f,#d97706,#fcd34d); }
+.flashcard[data-type="adjective"] .card-hero  { background:linear-gradient(160deg,#fffbeb 0%,#fef3c7 100%); border-bottom:1px solid #fde68a; }
+.flashcard[data-type="adjective"] .hero-label { color:#d97706; }
+.flashcard[data-type="adjective"] .hero-word  { color:#78350f; }
+.flashcard[data-type="adjective"] .type-badge { background:#78350f; color:#fff; border-color:#78350f; }
+.flashcard[data-type="adjective"] .col-label.wf  { color:#b45309; }
+.flashcard[data-type="adjective"] .col-label.wf  .col-label-dot { background:#f59e0b; }
+.flashcard[data-type="adjective"] .col-label.syn { color:#92400e; }
+.flashcard[data-type="adjective"] .col-label.syn .col-label-dot { background:#fbbf24; }
+.flashcard[data-type="adjective"] .wf-row  .word-row-marker { color:#f59e0b; }
+.flashcard[data-type="adjective"] .syn-row .word-row-marker { color:#fbbf24; }
+.flashcard[data-type="adjective"] .word-row:hover { background:#fffbeb; border-color:#fde68a; }
+.flashcard[data-type="adjective"] .examples-section { background:#fffdf0; }
+.flashcard[data-type="adjective"] .examples-label { color:#b45309; }
+.flashcard[data-type="adjective"] .examples-label .col-label-dot { background:#f59e0b; }
+.flashcard[data-type="adjective"] .example-item { border-left-color:#f59e0b; }
+.flashcard[data-type="adjective"] .example-num { color:#b45309; }
+.flashcard[data-type="adjective"] .notes-textarea:focus { border-color:#f59e0b; }
+
+/* ADVERB — deep rose / coral */
+.flashcard[data-type="adverb"] { border:1.5px solid #fecdd3; }
+.flashcard[data-type="adverb"] .card-stripe { background:linear-gradient(90deg,#881337,#e11d48,#fda4af); }
+.flashcard[data-type="adverb"] .card-hero  { background:linear-gradient(160deg,#fff1f2 0%,#ffe4e6 100%); border-bottom:1px solid #fecdd3; }
+.flashcard[data-type="adverb"] .hero-label { color:#e11d48; }
+.flashcard[data-type="adverb"] .hero-word  { color:#881337; }
+.flashcard[data-type="adverb"] .type-badge { background:#881337; color:#fff; border-color:#881337; }
+.flashcard[data-type="adverb"] .col-label.wf  { color:#be123c; }
+.flashcard[data-type="adverb"] .col-label.wf  .col-label-dot { background:#f43f5e; }
+.flashcard[data-type="adverb"] .col-label.syn { color:#9f1239; }
+.flashcard[data-type="adverb"] .col-label.syn .col-label-dot { background:#fb7185; }
+.flashcard[data-type="adverb"] .wf-row  .word-row-marker { color:#f43f5e; }
+.flashcard[data-type="adverb"] .syn-row .word-row-marker { color:#fb7185; }
+.flashcard[data-type="adverb"] .word-row:hover { background:#fff1f2; border-color:#fecdd3; }
+.flashcard[data-type="adverb"] .examples-section { background:#fff4f5; }
+.flashcard[data-type="adverb"] .examples-label { color:#be123c; }
+.flashcard[data-type="adverb"] .examples-label .col-label-dot { background:#f43f5e; }
+.flashcard[data-type="adverb"] .example-item { border-left-color:#f43f5e; }
+.flashcard[data-type="adverb"] .example-num { color:#be123c; }
+.flashcard[data-type="adverb"] .notes-textarea:focus { border-color:#f43f5e; }
+
+/* PHRASAL VERB — deep violet */
+.flashcard[data-type="phrasal verb"] { border:1.5px solid #ddd6fe; }
+.flashcard[data-type="phrasal verb"] .card-stripe { background:linear-gradient(90deg,#4c1d95,#7c3aed,#c4b5fd); }
+.flashcard[data-type="phrasal verb"] .card-hero  { background:linear-gradient(160deg,#f5f3ff 0%,#ede9fe 100%); border-bottom:1px solid #ddd6fe; }
+.flashcard[data-type="phrasal verb"] .hero-label { color:#7c3aed; }
+.flashcard[data-type="phrasal verb"] .hero-word  { color:#4c1d95; }
+.flashcard[data-type="phrasal verb"] .type-badge { background:#4c1d95; color:#fff; border-color:#4c1d95; }
+.flashcard[data-type="phrasal verb"] .col-label.wf  { color:#6d28d9; }
+.flashcard[data-type="phrasal verb"] .col-label.wf  .col-label-dot { background:#8b5cf6; }
+.flashcard[data-type="phrasal verb"] .col-label.syn { color:#5b21b6; }
+.flashcard[data-type="phrasal verb"] .col-label.syn .col-label-dot { background:#a78bfa; }
+.flashcard[data-type="phrasal verb"] .wf-row  .word-row-marker { color:#8b5cf6; }
+.flashcard[data-type="phrasal verb"] .syn-row .word-row-marker { color:#a78bfa; }
+.flashcard[data-type="phrasal verb"] .word-row:hover { background:#f5f3ff; border-color:#ddd6fe; }
+.flashcard[data-type="phrasal verb"] .examples-section { background:#f8f6ff; }
+.flashcard[data-type="phrasal verb"] .examples-label { color:#6d28d9; }
+.flashcard[data-type="phrasal verb"] .examples-label .col-label-dot { background:#8b5cf6; }
+.flashcard[data-type="phrasal verb"] .example-item { border-left-color:#8b5cf6; }
+.flashcard[data-type="phrasal verb"] .example-num { color:#6d28d9; }
+.flashcard[data-type="phrasal verb"] .notes-textarea:focus { border-color:#8b5cf6; }
+
+/* SHARED card structure */
+.card-stripe { height:7px; }
+.card-hero { text-align:center; padding:2.5rem 2rem 2rem; position:relative; }
+.hero-label { font-size:10px; text-transform:uppercase; letter-spacing:0.2em; font-weight:700; margin-bottom:1rem; opacity:0.8; }
+.hero-word { font-family:'Playfair Display',serif; font-size:58px; line-height:1.05; letter-spacing:-0.01em; margin-bottom:1rem; }
+.hero-meta { display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap; }
+.type-badge { font-size:10px; text-transform:uppercase; letter-spacing:0.14em; border-radius:20px; padding:4px 14px; font-weight:700; }
+.turkish-text { font-size:15px; font-family:'Playfair Display',serif; font-style:italic; color:#1a2744; background:rgba(255,255,255,0.6); border-radius:20px; padding:3px 14px; border:1px solid rgba(0,0,0,0.08); }
+.hero-actions { position:absolute; top:1.25rem; right:1.25rem; display:flex; gap:6px; }
+.card-body { display:grid; grid-template-columns:1fr 1fr; gap:0; border-top:1px solid var(--border); }
+.col-left { border-right:1px solid var(--border); }
+.col-left,.col-right { padding:1.5rem 1.75rem; }
+.col-label { font-size:10px; text-transform:uppercase; letter-spacing:0.16em; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:7px; }
+.col-label-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+/* fallback colors for untyped cards */
+.col-label.wf  { color:var(--teal); }
+.col-label.wf  .col-label-dot { background:var(--teal2); }
+.col-label.syn { color:var(--blue); }
+.col-label.syn .col-label-dot { background:var(--blue2); }
+.word-rows { display:flex; flex-direction:column; gap:6px; }
+.word-row { display:flex; align-items:flex-start; gap:10px; padding:8px 12px; border-radius:8px; border:1px solid transparent; font-size:14px; line-height:1.45; transition:background 0.12s; }
+.word-row:hover { background:var(--bg); border-color:var(--border); }
+.wf-row  .word-row-marker { color:var(--teal2); font-size:11px; margin-top:2px; flex-shrink:0; }
+.syn-row .word-row-marker { color:var(--blue2); font-size:11px; margin-top:2px; flex-shrink:0; }
+.word-row-text { color:var(--text); }
+.word-row-sub  { font-size:11px; color:var(--text3); font-weight:400; margin-left:3px; }
+.word-row-tr   { font-size:11px; color:var(--text3); font-style:italic; margin-top:1px; display:block; }
+
+/* Definition section */
+.definition-section { padding:1.25rem 1.75rem; border-top:1px solid var(--border); background:var(--surface); }
+.definition-label { font-size:10px; text-transform:uppercase; letter-spacing:0.16em; font-weight:700; color:var(--navy); margin-bottom:6px; display:flex; align-items:center; gap:7px; opacity:0.55; }
+.definition-text { font-size:14px; color:var(--text2); line-height:1.65; font-style:normal; }
+.examples-section { padding:1.5rem 1.75rem; background:#fafbfd; }
+.examples-label { font-size:10px; text-transform:uppercase; letter-spacing:0.16em; font-weight:700; color:var(--amber); margin-bottom:1rem; display:flex; align-items:center; gap:7px; }
+.examples-label .col-label-dot { background:var(--amber2); }
+.examples-list { display:flex; flex-direction:column; gap:8px; }
+.example-item { display:flex; gap:12px; align-items:flex-start; padding:10px 14px; background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--amber2); border-radius:0 9px 9px 0; font-size:14px; line-height:1.65; font-style:italic; color:var(--text2); }
+.example-num { font-size:10px; font-weight:700; color:var(--amber); font-style:normal; margin-top:2px; flex-shrink:0; }
+.notes-section { padding:1.5rem 1.75rem; border-top:1px solid var(--border); }
+.notes-label { font-size:10px; text-transform:uppercase; letter-spacing:0.16em; font-weight:700; color:var(--rose); margin-bottom:0.75rem; display:flex; align-items:center; gap:7px; }
+.notes-label .col-label-dot { background:var(--rose); }
+.notes-textarea { width:100%; min-height:90px; font-family:'Inter',sans-serif; font-size:14px; color:var(--text); line-height:1.7; border:1px solid var(--border); border-radius:10px; padding:12px 14px; background:var(--bg); resize:vertical; outline:none; transition:border-color 0.15s,background 0.15s; }
+.notes-textarea:focus { border-color:var(--blue2); background:#fff; }
+.notes-textarea::placeholder { color:var(--text3); }
+
+/* ════════════ CUSTOM LISTS ════════════ */
+.list-view-layout { display:grid; grid-template-columns:220px 1fr; gap:1.5rem; align-items:start; }
+.custom-lists-panel { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow2); overflow:hidden; position:sticky; top:80px; }
+.cl-panel-header { padding:1rem 1.25rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.cl-panel-header h3 { font-size:13px; font-weight:600; color:var(--navy); }
+.cl-entries { max-height:460px; overflow-y:auto; }
+.cl-entry {
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:10px 1.25rem; border-bottom:1px solid var(--border);
+  cursor:pointer; transition:background 0.12s; font-size:13px;
+}
+.cl-entry:last-child { border-bottom:none; }
+.cl-entry:hover { background:var(--bg); }
+.cl-entry.active { background:#edf1fc; border-left:3px solid var(--blue2); padding-left:calc(1.25rem - 3px); font-weight:600; color:var(--navy); }
+.cl-entry-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cl-entry-count { font-size:11px; color:var(--text3); flex-shrink:0; }
+.cl-entry-del { background:none; border:none; color:var(--text3); cursor:pointer; font-size:13px; padding:2px 5px; border-radius:4px; flex-shrink:0; opacity:0; transition:opacity 0.15s; }
+.cl-entry:hover .cl-entry-del { opacity:1; }
+.cl-entry-del:hover { color:var(--rose); }
+.cl-all-entry { padding:10px 1.25rem; border-bottom:1px solid var(--border); cursor:pointer; font-size:13px; color:var(--text2); transition:background 0.12s; display:flex; align-items:center; justify-content:space-between; }
+.cl-all-entry:hover { background:var(--bg); }
+.cl-all-entry.active { background:#edf1fc; border-left:3px solid var(--blue2); padding-left:calc(1.25rem - 3px); font-weight:600; color:var(--navy); }
+
+/* word item add-to-list button */
+.wi-list-btn { font-size:14px; background:none; border:1px solid var(--border); border-radius:6px; color:var(--text3); cursor:pointer; padding:2px 7px; flex-shrink:0; transition:all 0.15s; }
+.wi-list-btn:hover { background:var(--accent-light,#edf1fc); color:var(--blue); border-color:var(--blue2); }
+
+/* add-to-list popover */
+.atl-popover {
+  position:fixed; z-index:9990;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; box-shadow:var(--shadow-lg,0 8px 40px rgba(26,39,68,0.15));
+  padding:8px; min-width:180px;
+}
+.atl-popover-title { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text3); font-weight:600; padding:4px 8px 8px; }
+.atl-item { padding:7px 10px; border-radius:8px; font-size:13px; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.atl-item:hover { background:var(--bg); }
+.atl-item.in-list { color:var(--teal); }
+.atl-item-check { font-size:12px; }
+
+/* new list modal */
+.nl-modal { background:var(--surface); border-radius:14px; border:1px solid var(--border); box-shadow:var(--shadow); padding:1.5rem; width:90%; max-width:360px; }
+.nl-modal h3 { font-size:18px; font-family:'Playfair Display',serif; font-weight:600; color:var(--navy); margin-bottom:1.25rem; }
+.nl-modal input { width:100%; padding:9px 12px; font-size:14px; font-family:'Inter',sans-serif; border:1px solid var(--border); border-radius:9px; background:var(--bg); color:var(--text); outline:none; }
+.nl-modal input:focus { border-color:var(--blue2); background:#fff; }
+.nl-modal-footer { display:flex; justify-content:flex-end; gap:8px; margin-top:1.25rem; }
+
+@media(max-width:680px) {
+  .list-view-layout { grid-template-columns:1fr; }
+  .custom-lists-panel { position:static; }
+}
+.list-filter-tabs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:1.25rem; }
+.lf-tab {
+  font-family:'Inter',sans-serif; font-size:11px; font-weight:600;
+  padding:5px 16px; border-radius:20px; border:1.5px solid var(--border2);
+  background:var(--surface); color:var(--text2); cursor:pointer; transition:all 0.15s;
+}
+.lf-tab:hover { background:var(--surface2); }
+.lf-tab.active { color:#fff; border-color:transparent; }
+.lf-tab-all.active   { background:var(--navy); }
+.lf-tab-noun.active  { background:#1e3a8a; border-color:#1e3a8a; }
+.lf-tab-verb.active  { background:#14532d; border-color:#14532d; }
+.lf-tab-adjective.active { background:#78350f; border-color:#78350f; }
+.lf-tab-adverb.active    { background:#881337; border-color:#881337; }
+.lf-tab-phrasal.active   { background:#4c1d95; border-color:#4c1d95; }
+
+.list-count { font-size:12px; color:var(--text3); margin-bottom:10px; }
+.word-list-ul { list-style:none; }
+.word-item {
+  display:flex; align-items:center; gap:14px;
+  padding:13px 18px; background:var(--surface);
+  border:1px solid var(--border); border-radius:11px;
+  margin-bottom:6px; cursor:pointer; transition:all 0.15s;
+  border-left:4px solid var(--border2);
+}
+.word-item:hover { box-shadow:var(--shadow2); }
+.wi-word { font-family:'Playfair Display',serif; font-size:19px; color:var(--navy); flex:1; }
+.wi-type { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; border-radius:20px; padding:3px 11px; font-weight:700; flex-shrink:0; }
+.wi-del  { font-size:11px; background:none; border:none; color:var(--text3); cursor:pointer; padding:3px 8px; border-radius:6px; flex-shrink:0; }
+.wi-del:hover { color:var(--rose); background:#fff0f2; }
+
+/* noun — blue */
+.wi-type-noun      { background:#dbeafe; color:#1e3a8a; }
+.word-item-noun    { border-left-color:#3b82f6; }
+.word-item-noun:hover { border-color:#93c5fd; border-left-color:#3b82f6; }
+
+/* verb — green */
+.wi-type-verb      { background:#dcfce7; color:#14532d; }
+.word-item-verb    { border-left-color:#22c55e; }
+.word-item-verb:hover { border-color:#bbf7d0; border-left-color:#22c55e; }
+
+/* adjective — amber */
+.wi-type-adjective { background:#fef3c7; color:#78350f; }
+.word-item-adjective { border-left-color:#f59e0b; }
+.word-item-adjective:hover { border-color:#fde68a; border-left-color:#f59e0b; }
+
+/* adverb — rose */
+.wi-type-adverb    { background:#ffe4e6; color:#881337; }
+.word-item-adverb  { border-left-color:#f43f5e; }
+.word-item-adverb:hover { border-color:#fecdd3; border-left-color:#f43f5e; }
+
+/* phrasal verb — violet */
+.wi-type-phrasal   { background:#ede9fe; color:#4c1d95; }
+.word-item-phrasal { border-left-color:#8b5cf6; }
+.word-item-phrasal:hover { border-color:#ddd6fe; border-left-color:#8b5cf6; }
+
+/* other / unset */
+.wi-type-other     { background:#f1f5f9; color:var(--text2); }
+.word-item-other   { border-left-color:var(--border2); }
+.word-item-other:hover { border-color:var(--border2); }
+
+.type-legend { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:1.25rem; align-items:center; }
+.type-legend-item { display:flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:var(--text2); }
+.type-legend-dot { width:9px; height:9px; border-radius:50%; }
+
+/* ════════════ TEXT STUDY VIEW ════════════ */
+.text-study { display:grid; grid-template-columns:280px 1fr; gap:1.5rem; align-items:start; }
+
+/* Left panel — text list */
+.text-list-panel { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow2); overflow:hidden; }
+.text-list-header { padding:1.1rem 1.25rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.text-list-header h3 { font-size:13px; font-weight:600; color:var(--navy); }
+.text-entries { max-height:520px; overflow-y:auto; }
+.text-entry {
+  padding:1rem 1.25rem; border-bottom:1px solid var(--border);
+  cursor:pointer; transition:background 0.12s;
+  display:flex; flex-direction:column; gap:3px;
+}
+.text-entry:last-child { border-bottom:none; }
+.text-entry:hover { background:var(--bg); }
+.text-entry.active { background:#edf1fc; border-left:3px solid var(--blue2); padding-left:calc(1.25rem - 3px); }
+.text-entry-title { font-size:13px; font-weight:600; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.text-entry-meta { font-size:11px; color:var(--text3); }
+.text-entry-actions { display:flex; gap:4px; margin-top:6px; }
+.text-no-entries { padding:2rem 1.25rem; text-align:center; color:var(--text3); font-size:13px; }
+
+/* Right panel — text reader + add */
+.text-reader-panel { display:flex; flex-direction:column; gap:1.25rem; }
+
+/* Add text card */
+.add-text-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow2); overflow:hidden; }
+.add-text-card-header { padding:1.1rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; }
+.add-text-card-header h3 { font-size:13px; font-weight:600; color:var(--navy); display:flex; align-items:center; gap:8px; }
+.add-text-card-header .toggle-icon { font-size:11px; color:var(--text3); transition:transform 0.2s; }
+.add-text-card-header.open .toggle-icon { transform:rotate(180deg); }
+.add-text-body { padding:1.25rem 1.5rem; display:none; }
+.add-text-body.open { display:block; }
+.add-text-field { margin-bottom:1rem; }
+.add-text-field label { display:block; font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--text3); font-weight:600; margin-bottom:5px; }
+.add-text-field input, .add-text-field textarea {
+  width:100%; padding:9px 12px; font-size:14px; font-family:'Inter',sans-serif;
+  border:1px solid var(--border); border-radius:9px; background:var(--bg); color:var(--text);
+  outline:none; resize:vertical; transition:border-color 0.15s;
+}
+.add-text-field input:focus, .add-text-field textarea:focus { border-color:var(--blue2); background:#fff; }
+.add-text-actions { display:flex; justify-content:flex-end; gap:8px; }
+
+/* Active text viewer */
+.text-viewer-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow2); overflow:hidden; }
+.text-viewer-top { padding:1.1rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+.text-viewer-title { font-family:'Playfair Display',serif; font-size:18px; color:var(--navy); }
+.text-viewer-body { padding:1.5rem; }
+.text-content {
+  font-size:15px; line-height:1.85; color:var(--text2);
+  white-space:pre-wrap; max-height:320px; overflow-y:auto;
+  font-family:'Inter',sans-serif;
+}
+.text-content .highlight-word {
+  background:#fff3cd; border-bottom:2px solid var(--amber2);
+  border-radius:2px; cursor:pointer; padding:0 2px;
+  transition:background 0.15s;
+}
+.text-content .highlight-word:hover { background:#ffe08a; }
+.text-viewer-footer { padding:1rem 1.5rem; border-top:1px solid var(--border); background:#fafbfd; }
+
+/* AI Analyze button + status */
+.analyze-bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.analyze-status { font-size:12px; color:var(--text3); font-style:italic; }
+.analyze-status.running { color:var(--purple); }
+.analyze-status.done    { color:var(--teal); font-style:normal; font-weight:500; }
+.analyze-status.error   { color:var(--rose); font-style:normal; }
+
+/* AI result words */
+.ai-words-section { margin-top:1.5rem; }
+.ai-words-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px; }
+.ai-words-label { font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--purple); font-weight:700; display:flex; align-items:center; gap:6px; }
+.ai-words-label::before { content:''; display:inline-block; width:8px; height:8px; background:var(--purple2); border-radius:50%; }
+.ai-select-count { font-size:12px; color:var(--text3); }
+.ai-select-count strong { color:var(--purple); font-weight:600; }
+.ai-word-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+
+/* base chip */
+.ai-word-chip {
+  position:relative;
+  display:inline-flex; align-items:center; gap:6px;
+  background:#f3eeff; border:1.5px solid #d4bdf5; border-radius:10px;
+  padding:8px 14px; font-size:13px; color:var(--purple);
+  cursor:pointer; transition:all 0.18s; font-weight:500;
+  user-select:none;
+}
+
+/* hover — show "Select" overlay */
+.ai-word-chip:not(.selected):not(.already-added):hover {
+  background:#ece0ff; border-color:var(--purple2);
+  transform:translateY(-1px); box-shadow:0 3px 10px rgba(107,63,160,0.18);
+}
+.chip-hover-label {
+  display:none;
+  position:absolute; top:-28px; left:50%; transform:translateX(-50%);
+  background:var(--purple); color:#fff; font-size:10px; font-weight:600;
+  padding:3px 9px; border-radius:6px; white-space:nowrap; pointer-events:none;
+  letter-spacing:0.06em;
+}
+.chip-hover-label::after {
+  content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+  border:4px solid transparent; border-top-color:var(--purple);
+}
+.ai-word-chip:not(.selected):not(.already-added):hover .chip-hover-label { display:block; }
+
+/* selected state */
+.ai-word-chip.selected {
+  background:var(--purple); color:#fff; border-color:var(--purple);
+  box-shadow:0 2px 8px rgba(107,63,160,0.35);
+}
+.ai-word-chip.selected .chip-type { color:rgba(255,255,255,0.65); }
+.ai-word-chip.selected .chip-check { display:inline; }
+.chip-check { display:none; font-size:12px; }
+
+/* already added to word list */
+.ai-word-chip.already-added {
+  background:#e8f5ee; border-color:#a8d5bc; color:var(--teal);
+  cursor:default; opacity:0.75;
+}
+.ai-word-chip.already-added::after { content:' ✓'; font-size:11px; }
+
+.ai-word-chip span.chip-type { font-size:10px; font-weight:400; color:#b89de0; }
+
+/* preview popover on chip hover */
+.chip-preview {
+  display:none;
+  position:fixed;
+  background:#1e1640; color:#e2d9f3;
+  font-size:12px; font-weight:400; line-height:1.6;
+  padding:10px 14px; border-radius:10px;
+  pointer-events:none; z-index:9990;
+  box-shadow:0 6px 24px rgba(0,0,0,0.4);
+  min-width:180px; max-width:260px; white-space:normal;
+  border:1px solid rgba(167,139,250,0.35);
+}
+.ai-word-chip:not(.already-added):hover .chip-preview { display:block; }
+
+/* add selected button */
+.ai-add-selected-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px;
+  background:linear-gradient(135deg,#f0e8ff 0%,#e8f0ff 100%);
+  border:1.5px solid #d4bdf5; border-radius:12px;
+  gap:12px; flex-wrap:wrap;
+}
+.ai-add-selected-bar.hidden { display:none; }
+.ai-add-info { font-size:13px; color:var(--purple); font-weight:500; }
+.ai-add-info span { font-size:12px; color:var(--text2); font-weight:400; margin-left:6px; }
+.btn-add-selected {
+  background:var(--purple); color:#fff; border:none;
+  font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
+  padding:10px 22px; border-radius:9px; cursor:pointer;
+  transition:all 0.15s; white-space:nowrap;
+  box-shadow:0 2px 8px rgba(107,63,160,0.3);
+}
+.btn-add-selected:hover { background:var(--purple2); transform:translateY(-1px); box-shadow:0 4px 14px rgba(107,63,160,0.4); }
+.btn-add-selected:active { transform:scale(0.97); }
+.btn-add-selected:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+/* Loading spinner */
+.spinner { display:inline-block; width:14px; height:14px; border:2px solid #d4bdf5; border-top-color:var(--purple); border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:4px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(15,25,60,0.45); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--surface); border-radius:18px; border:1px solid var(--border); box-shadow:var(--shadow); padding:1.75rem; width:90%; max-width:520px; max-height:92vh; overflow-y:auto; }
+.modal h2 { font-family:'Playfair Display',serif; font-size:24px; font-weight:600; color:var(--navy); margin-bottom:1.5rem; }
+.field { margin-bottom:1rem; }
+.field label { display:block; font-size:10px; text-transform:uppercase; letter-spacing:0.12em; color:var(--text3); font-weight:600; margin-bottom:5px; }
+.field input,.field textarea,.field select { width:100%; padding:9px 12px; font-size:14px; font-family:'Inter',sans-serif; border:1px solid var(--border); border-radius:9px; background:var(--bg); color:var(--text); outline:none; resize:vertical; transition:border-color 0.15s; }
+.field input:focus,.field textarea:focus,.field select:focus { border-color:var(--blue2); background:#fff; }
+.field-hint { font-size:11px; color:var(--text3); margin-top:4px; }
+.examples-editor { display:flex; flex-direction:column; gap:7px; }
+.example-row { display:flex; gap:6px; align-items:flex-start; }
+.example-row textarea { flex:1; min-height:56px; }
+.remove-ex { flex-shrink:0; width:34px; height:34px; display:flex; align-items:center; justify-content:center; font-size:18px; color:var(--text3); background:none; border:1px solid var(--border); border-radius:8px; cursor:pointer; }
+.remove-ex:hover { color:var(--rose); border-color:#f0c0c8; background:#fff0f2; }
+.add-ex-btn { margin-top:6px; font-size:12px; padding:6px 14px; color:var(--blue); border:1px solid #c8d5f5; background:#edf1fc; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-weight:500; }
+.add-ex-btn:hover { background:#dde7f8; }
+.modal-footer { display:flex; justify-content:flex-end; gap:8px; margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid var(--border); }
+
+.empty-state { text-align:center; padding:4rem 2rem; color:var(--text3); }
+.empty-state p { font-size:15px; margin-bottom:1.25rem; }
+
+/* Quick-add modal */
+.quick-add-info { background:#f3eeff; border:1px solid #d4bdf5; border-radius:10px; padding:12px 16px; margin-bottom:1.25rem; font-size:13px; color:var(--purple); line-height:1.6; }
+
+@media(max-width:720px) {
+  .text-study { grid-template-columns:1fr; }
+  .hero-word { font-size:38px; }
+  .card-body { grid-template-columns:1fr; }
+  .col-left { border-right:none; border-bottom:1px solid var(--border); }
+  .list-header,.word-item { grid-template-columns:1fr 65px auto; }
+  .list-header span:nth-child(3),.wi-syn { display:none; }
+  header { padding:0.85rem 1rem; }
+  .main { padding:1.25rem 1rem; }
+}
 </style>
 </head>
 <body>
@@ -27,6 +559,7 @@
     <button class="vtab" id="tabText">Text Study</button>
   </div>
 
+  <!-- FLASHCARD VIEW -->
   <div id="cardView">
     <div class="card-nav" id="cardNav" style="display:none">
       <button class="btn" id="prevBtn">← Previous</button>
@@ -36,8 +569,10 @@
     <div id="cardContainer"></div>
   </div>
 
+  <!-- WORD LIST VIEW -->
   <div id="listView" style="display:none">
     <div class="list-view-layout">
+      <!-- Left: custom lists panel -->
       <div class="custom-lists-panel">
         <div class="cl-panel-header">
           <h3>My Lists</h3>
@@ -47,95 +582,1040 @@
           <span>All Words</span>
           <span class="cl-entry-count" id="clAllCount">0</span>
         </div>
-        <div id="clEntries"></div>
+        <div class="cl-entries" id="clEntries"></div>
       </div>
+      <!-- Right: word list -->
       <div id="listContainer"></div>
     </div>
   </div>
 
+  <!-- TEXT STUDY VIEW -->
   <div id="textView" style="display:none">
-     </div>
+    <div class="text-study">
+      <!-- LEFT: text list -->
+      <div class="text-list-panel">
+        <div class="text-list-header">
+          <h3>My Texts</h3>
+          <button class="btn btn-sm btn-primary" id="openAddText">+ Add</button>
+        </div>
+        <div class="text-entries" id="textEntries">
+          <div class="text-no-entries">No texts yet.<br>Add a text to begin.</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: reader + analyze -->
+      <div class="text-reader-panel" id="textReaderPanel">
+        <div style="text-align:center; padding:3rem 1rem; color:var(--text3);">
+          <div style="font-size:40px; margin-bottom:1rem;">📄</div>
+          <div style="font-size:15px; font-weight:500; color:var(--navy); margin-bottom:6px;">Select a text to study</div>
+          <div style="font-size:13px;">Add a text from the left panel and start analyzing.</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+<!-- ADD TEXT MODAL -->
+<div class="modal-overlay" id="addTextModal">
+  <div class="modal">
+    <h2>Add New Text</h2>
+    <div class="field">
+      <label>Title *</label>
+      <input id="txtTitle" placeholder="e.g. The Economist — Supply Chain Article" />
+    </div>
+    <div class="field">
+      <label>Paste your text *</label>
+      <textarea id="txtBody" rows="10" placeholder="Paste the article, paragraph, or any English text here..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="cancelAddText">Cancel</button>
+      <button class="btn btn-primary" id="saveAddText">Save Text</button>
+    </div>
+  </div>
+</div>
 
-// Senin paylaştığın config
-const firebaseConfig = {
-  apiKey: "AIzaSyDZZ-bfK-xhlCnzsQLdl6LqOE_Zv1GeeW0",
-  authDomain: "sadik-vocab.firebaseapp.com",
-  databaseURL: "https://sadik-vocab-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "sadik-vocab",
-  storageBucket: "sadik-vocab.firebasestorage.app",
-  messagingSenderId: "715545407411",
-  appId: "1:715545407411:web:eace078019cc3335bce5c6"
-};
+<!-- WORD MODAL (add/edit) -->
+<div class="modal-overlay" id="wordModal">
+  <div class="modal">
+    <h2 id="wordModalTitle">Add New Word</h2>
+    <div class="quick-add-info" id="quickAddInfo" style="display:none"></div>
+    <div class="field"><label>Word *</label><input id="fWord" placeholder="e.g. efficiency" /></div>
+    <div class="field">
+      <label>Word Type</label>
+      <select id="fType">
+        <option value="">Select...</option>
+        <option>noun</option><option>verb</option><option>adjective</option>
+        <option>adverb</option><option>phrasal verb</option>
+      </select>
+    </div>
+    <div class="field"><label>Turkish Meaning</label><input id="fTr" placeholder="e.g. verimlilik" /></div>
+    <div class="field">
+      <label>Definition (English)</label>
+      <input id="fDef" placeholder="e.g. The ability to do something well without wasting energy." />
+      <div class="field-hint">Short, simple English explanation</div>
+    </div>
+    <div class="field">
+      <label>Word Family</label>
+      <input id="fFamily" placeholder="e.g. efficient (adj) | verimli, efficiently (adv) | verimli şekilde" />
+      <div class="field-hint">Separate with commas. Add <strong>|</strong> then Turkish meaning after each entry (optional)</div>
+    </div>
+    <div class="field">
+      <label>Synonyms / Similar Meaning</label>
+      <input id="fSyn" placeholder="e.g. effectiveness | etkinlik, productivity | verimlilik" />
+      <div class="field-hint">Separate with commas. Add <strong>|</strong> then Turkish meaning after each word (optional)</div>
+    </div>
+    <div class="field">
+      <label>Example Sentences</label>
+      <div class="examples-editor" id="examplesEditor"></div>
+      <button class="add-ex-btn" id="addExBtn">+ Add Sentence</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="cancelWord">Cancel</button>
+      <button class="btn btn-primary" id="saveWord">Save</button>
+    </div>
+  </div>
+</div>
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const wordsRef = ref(db, 'words');
+<script>
+/* ══════════════════════════════════════════════
+   STORAGE
+══════════════════════════════════════════════ */
+const SK_WORDS = 'sadik_vocab_v11';
+const SK_NOTES = 'sadik_notes_v5';
+const SK_TEXTS = 'sadik_texts_v5';
+const SK_LISTS = 'sadik_lists_v1';
 
-// Uygulama Değişkenleri
-let words = [];
-let current = 0;
+const defaultWords = [
+  { word:'efficiency', type:'noun', turkish:'verimlilik',
+    definition:'The ability to do something well without wasting time, money, or energy.',
+    family:'efficient (adj) | verimli, efficiently (adv) | verimli bir şekilde, inefficiency (n) | verimsizlik, inefficient (adj) | verimsiz',
+    synonyms:'effectiveness | etkinlik, productivity | üretkenlik, performance | performans, output rate | çıktı oranı',
+    examples:['The new assembly line improved production efficiency by 30%.','Energy efficiency is a key metric in battery manufacturing.'] },
+  { word:'optimize', type:'verb', turkish:'optimize etmek',
+    definition:'To make something as good or effective as possible.',
+    family:'optimization (n) | optimizasyon, optimal (adj) | en uygun, optimally (adv) | en uygun şekilde, suboptimal (adj) | yetersiz',
+    synonyms:'improve | geliştirmek, enhance | iyileştirmek, maximize | en üst düzeye çıkarmak, streamline | kolaylaştırmak, fine-tune | ince ayar yapmak',
+    examples:['We need to optimize the battery cell formation process to reduce cycle time.','The team worked to optimize material flow between workstations.'] },
+  { word:'systematic', type:'adjective', turkish:'sistematik, düzenli',
+    definition:'Done according to a fixed plan or method; organized and thorough.',
+    family:'systematically (adv) | sistematik biçimde, system (n) | sistem, systematize (v) | sistematize etmek',
+    synonyms:'methodical | yöntemli, organized | düzenli, structured | yapılandırılmış, orderly | tertipli, logical | mantıklı',
+    examples:['A systematic approach to quality control reduces defect rates significantly.','The engineer conducted a systematic analysis of the production bottlenecks.'] },
+  { word:'consistently', type:'adverb', turkish:'tutarlı bir şekilde',
+    definition:'In a way that stays the same and does not change over time.',
+    family:'consistent (adj) | tutarlı, consistency (n) | tutarlılık, inconsistently (adv) | tutarsız biçimde',
+    synonyms:'steadily | istikrarlı şekilde, uniformly | tekdüze, reliably | güvenilir şekilde, regularly | düzenli olarak, constantly | sürekli olarak',
+    examples:['The machinery consistently produced parts within the required tolerance levels.','Output quality has consistently improved since the new process was implemented.'] },
+  { word:'break down', type:'phrasal verb', turkish:'parçalara ayırmak / arızalanmak',
+    definition:'To divide something into smaller parts, or to stop working.',
+    family:'',
+    synonyms:'disassemble | sökmek, decompose | ayrıştırmak, analyse | analiz etmek, malfunction | arızalanmak, fail | başarısız olmak',
+    examples:['Engineers break down complex processes into smaller, manageable steps.','The conveyor belt broke down during the night shift, halting production.'] },
+];
 
-// VERİLERİ FİREBASE'DEN ÇEKME
-onValue(wordsRef, (snapshot) => {
-  const data = snapshot.val();
-  if (data) {
-    // Firebase objesini array'e çeviriyoruz (ID'leri saklayarak)
-    words = Object.keys(data).map(key => ({
-      id: key,
-      ...data[key]
-    }));
-  } else {
-    words = [];
+
+let words       = JSON.parse(localStorage.getItem(SK_WORDS) || 'null') || defaultWords;
+let allNotes    = JSON.parse(localStorage.getItem(SK_NOTES) || '{}');
+let texts       = JSON.parse(localStorage.getItem(SK_TEXTS) || '[]');
+// customLists: [{id, name, wordKeys:[word.toLowerCase(),...]}]
+let customLists = JSON.parse(localStorage.getItem(SK_LISTS) || '[]');
+let activeListId = null; // null = show all
+
+let current       = 0;
+let editIdx       = -1;
+let activeTextIdx = -1;
+let tempExamples  = [];
+let aiWords       = [];
+let addedChips    = new Set();
+let selectedChips = new Set();
+let quickAddWord  = null;
+
+function saveAll() {
+  localStorage.setItem(SK_WORDS, JSON.stringify(words));
+  localStorage.setItem(SK_NOTES, JSON.stringify(allNotes));
+  localStorage.setItem(SK_TEXTS, JSON.stringify(texts));
+  localStorage.setItem(SK_LISTS, JSON.stringify(customLists));
+  document.getElementById('statsPill').textContent = words.length + (words.length===1?' word':' words');
+}
+
+/* ══════════════════════════════════════════════
+   FLASHCARD
+══════════════════════════════════════════════ */
+function renderCard() {
+  const container = document.getElementById('cardContainer');
+  const nav = document.getElementById('cardNav');
+  if (!words.length) {
+    nav.style.display='none';
+    container.innerHTML=`<div class="empty-state"><p>No words yet.</p><button class="btn btn-primary" onclick="openWordModal()">+ Add First Word</button></div>`;
+    return;
   }
-  updateUI();
-});
+  nav.style.display='flex';
+  document.getElementById('cardCounter').innerHTML=`<strong>${current+1}</strong> / ${words.length}`;
+  const w=words[current];
+  const key=w.word.toLowerCase();
+  const note=allNotes[key]||'';
 
-function updateUI() {
-  document.getElementById('statsPill').textContent = words.length + " words";
-  renderCard();
+  const typeL = (w.type||'').toLowerCase();
+  const isPhrase = ['phrasal verb'].includes(typeL);
+
+  const familyRows = (!isPhrase && w.family)
+    ? w.family.split(',').map(s=>s.trim()).filter(Boolean).map(s=>{
+        const pipeParts = s.split('|');
+        const engPart = pipeParts[0].trim();
+        const tr = pipeParts[1] ? pipeParts[1].trim() : '';
+        const m = engPart.match(/^(.+?)\s*(\(.*\))\s*$/);
+        const main = m ? m[1].trim() : engPart;
+        const sub  = m ? m[2] : '';
+        return `<div class="word-row wf-row">
+          <span class="word-row-marker">▶</span>
+          <span class="word-row-text">${main}<span class="word-row-sub">${sub}</span>${tr?`<span class="word-row-tr">${tr}</span>`:''}</span>
+        </div>`;
+      }).join('')
+    : (!isPhrase ? '<span style="font-size:13px;color:var(--text3)">—</span>' : null);
+
+  const synRows = w.synonyms
+    ? w.synonyms.split(',').map(s=>s.trim()).filter(Boolean).map(s=>{
+        const parts = s.split('|');
+        const eng = parts[0].trim();
+        const tr  = parts[1] ? parts[1].trim() : '';
+        return `<div class="word-row syn-row">
+          <span class="word-row-marker">▶</span>
+          <span class="word-row-text">${eng}${tr?`<span class="word-row-tr">${tr}</span>`:''}</span>
+        </div>`;
+      }).join('')
+    : '<span style="font-size:13px;color:var(--text3)">—</span>';
+
+  const definition = w.definition || '';
+
+
+  const exHTML = (w.examples&&w.examples.length)
+    ? w.examples.map((ex,i)=>`<div class="example-item"><span class="example-num">${i+1}.</span>${ex}</div>`).join('')
+    : '<span style="font-size:13px;color:var(--text3);font-style:italic">No examples yet.</span>';
+
+  // card body layout: phrase types → full-width synonyms only; others → two columns
+  const cardBodyHTML = isPhrase
+    ? `<div class="card-body" style="grid-template-columns:1fr;">
+        <div style="padding:1.5rem 1.75rem;">
+          <div class="col-label syn"><span class="col-label-dot"></span>Synonym — Similar Meaning</div>
+          <div class="word-rows">${synRows}</div>
+        </div>
+      </div>`
+    : `<div class="card-body">
+        <div class="col-left">
+          <div class="col-label wf"><span class="col-label-dot"></span>Word Family</div>
+          <div class="word-rows">${familyRows}</div>
+        </div>
+        <div class="col-right">
+          <div class="col-label syn"><span class="col-label-dot"></span>Synonym — Similar Meaning</div>
+          <div class="word-rows">${synRows}</div>
+        </div>
+      </div>`;
+
+  container.innerHTML=`
+  <div class="flashcard" data-type="${(w.type||'').toLowerCase()}">
+    <div class="card-stripe"></div>
+    <div class="card-hero">
+      <div class="hero-label">VOCABULARY</div>
+      <div class="hero-word">${w.word}</div>
+      <div class="hero-meta">
+        ${w.type?`<span class="type-badge">${w.type}</span>`:''}
+        ${w.turkish?`<span class="turkish-text">${w.turkish}</span>`:''}
+      </div>
+      <div class="hero-actions">
+        <button class="btn btn-sm" onclick="editWord(${current})">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteWord(${current})">Delete</button>
+      </div>
+    </div>
+    ${cardBodyHTML}
+    ${definition?`<div class="definition-section">
+      <div class="definition-label">Definition</div>
+      <div class="definition-text">${definition}</div>
+    </div>`:''}
+    <div class="examples-section">
+      <div class="examples-label"><span class="col-label-dot"></span>Example Sentences</div>
+      <div class="examples-list">${exHTML}</div>
+    </div>
+    <div class="notes-section">
+      <div class="notes-label"><span class="col-label-dot"></span>My Notes</div>
+      <textarea class="notes-textarea" id="notesArea"
+        placeholder="Write your notes here — grammar tips, usage, personal associations..."
+        oninput="saveNote('${key}',this.value)">${note}</textarea>
+    </div>
+  </div>`;
+}
+
+function saveNote(k,v){ allNotes[k]=v; localStorage.setItem(SK_NOTES,JSON.stringify(allNotes)); }
+
+/* ══════════════════════════════════════════════
+   WORD LIST
+══════════════════════════════════════════════ */
+function typeClass(t) {
+  if (!t) return 'other';
+  const l = t.toLowerCase();
+  if (l==='noun')         return 'noun';
+  if (l==='verb')         return 'verb';
+  if (l==='adjective')    return 'adjective';
+  if (l==='adverb')       return 'adverb';
+  if (l==='phrasal verb') return 'phrasal';
+  return 'other';
+}
+
+let listFilter = 'all';
+
+/* ── render the left panel (My Lists) ── */
+function renderCustomListsPanel() {
+  const allEntry = document.getElementById('clAllEntry');
+  const countEl  = document.getElementById('clAllCount');
+  const entries  = document.getElementById('clEntries');
+  if (!allEntry) return;
+
+  countEl.textContent = words.length;
+  allEntry.className = 'cl-all-entry' + (activeListId===null?' active':'');
+
+  entries.innerHTML = customLists.map(lst => {
+    const cnt = lst.wordKeys ? lst.wordKeys.filter(k => words.find(w=>w.word.toLowerCase()===k)).length : 0;
+    return `<div class="cl-entry ${activeListId===lst.id?'active':''}" onclick="setCustomList('${lst.id}')">
+      <span class="cl-entry-name">${lst.name}</span>
+      <span class="cl-entry-count">${cnt}</span>
+      <button class="cl-entry-del" onclick="event.stopPropagation();deleteCustomList('${lst.id}')" title="Delete list">×</button>
+    </div>`;
+  }).join('');
+}
+
+function renderList() {
+  const c = document.getElementById('listContainer');
+  if (!c) return;
+
+  renderCustomListsPanel();
+
+  const types = [
+    { key:'all', label:'All', cls:'all' },
+    { key:'noun', label:'Noun', cls:'noun' },
+    { key:'verb', label:'Verb', cls:'verb' },
+    { key:'adjective', label:'Adjective', cls:'adjective' },
+    { key:'adverb', label:'Adverb', cls:'adverb' },
+    { key:'phrasal verb', label:'Phrasal Verb', cls:'phrasal' },
+  ];
+
+  // which words to show: custom list or all
+  let baseWords = words;
+  let listLabel = 'All Words';
+  if (activeListId !== null) {
+    const lst = customLists.find(l => l.id === activeListId);
+    if (lst) {
+      listLabel = lst.name;
+      const keys = lst.wordKeys || [];
+      baseWords = words.filter(w => keys.includes(w.word.toLowerCase()));
+    }
+  }
+
+  const filtered = listFilter === 'all'
+    ? baseWords
+    : baseWords.filter(w => (w.type||'').toLowerCase() === listFilter);
+
+  const tabsHTML = types.map(t => {
+    const count = t.key === 'all'
+      ? baseWords.length
+      : baseWords.filter(w=>(w.type||'').toLowerCase()===t.key).length;
+    if (t.key !== 'all' && count === 0) return '';
+    return `<button class="lf-tab lf-tab-${t.cls} ${listFilter===t.key?'active':''}"
+      onclick="setListFilter('${t.key}')">${t.label} <span style="opacity:0.65;font-weight:400">${count}</span></button>`;
+  }).join('');
+
+  const listHTML = !words.length
+    ? `<div class="empty-state"><p>No words yet.</p><button class="btn btn-primary" onclick="openWordModal()">+ Add First Word</button></div>`
+    : filtered.length
+      ? `<ul class="word-list-ul">${filtered.map(w => {
+          const realIdx = words.indexOf(w);
+          const tc = typeClass(w.type);
+          const inList = activeListId !== null;
+          return `<li class="word-item word-item-${tc}" onclick="goCard(${realIdx})">
+            <span class="wi-word">${w.word}</span>
+            <span class="wi-type wi-type-${tc}">${w.type||'—'}</span>
+            <button class="wi-list-btn" title="Add to list" onclick="event.stopPropagation();openAtlPopover(event,${realIdx})">＋</button>
+            <button class="wi-del" onclick="event.stopPropagation();deleteWord(${realIdx})">×</button>
+          </li>`;
+        }).join('')}</ul>`
+      : `<div style="padding:2rem;text-align:center;color:var(--text3);font-size:14px;">No words in this category yet.</div>`;
+
+  c.innerHTML = `
+    <div class="list-filter-tabs">${tabsHTML}</div>
+    <div class="list-count">${filtered.length} word${filtered.length!==1?'s':''} ${activeListId?`in <strong>${listLabel}</strong>`:''}</div>
+    ${listHTML}`;
+}
+
+function setListFilter(f) { listFilter = f; renderList(); }
+
+function setCustomList(id) {
+  activeListId = id;
+  listFilter = 'all';
   renderList();
 }
 
-// YENİ KELİME KAYDETME (Firebase'e)
-window.saveWordEntry = function() {
-  const word = document.getElementById('fWord').value.trim();
-  if (!word) return;
+/* ── Custom list CRUD ── */
+function openNewListModal() {
+  document.getElementById('nlName').value = '';
+  document.getElementById('newListModal').classList.add('open');
+  setTimeout(()=>document.getElementById('nlName').focus(), 80);
+}
+function closeNewListModal() { document.getElementById('newListModal').classList.remove('open'); }
 
-  const entry = {
-    word,
-    type: document.getElementById('fType').value,
-    turkish: document.getElementById('fTr').value.trim(),
-    definition: document.getElementById('fDef').value.trim(),
-    family: document.getElementById('fFamily').value.trim(),
-    synonyms: document.getElementById('fSyn').value.trim(),
-    examples: tempExamples.filter(e => e.trim() !== "")
+function saveNewList() {
+  const name = document.getElementById('nlName').value.trim();
+  if (!name) { alert('Please enter a list name.'); return; }
+  const id = 'lst_' + Date.now();
+  customLists.push({ id, name, wordKeys:[] });
+  saveAll();
+  closeNewListModal();
+  activeListId = id;
+  renderList();
+  showToast(`"${name}" list created.`);
+}
+
+function deleteCustomList(id) {
+  const lst = customLists.find(l=>l.id===id);
+  if (!lst) return;
+  const overlay = document.createElement('div');
+  overlay.style.cssText=`position:fixed;inset:0;background:rgba(15,25,60,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);`;
+  overlay.innerHTML=`<div style="background:#fff;border-radius:16px;border:1px solid #dde3f0;box-shadow:0 8px 40px rgba(26,39,68,0.18);padding:2rem;max-width:360px;width:90%;font-family:'Inter',sans-serif;">
+    <div style="font-size:15px;font-weight:600;color:#1a2744;margin-bottom:8px;">Delete list?</div>
+    <div style="font-size:14px;color:#4a5878;margin-bottom:1.5rem;"><strong>"${lst.name}"</strong> will be deleted. Words stay in your main list.</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button id="dlCancel" style="font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:8px 18px;border-radius:8px;border:1px solid #c2cce0;background:transparent;color:#1a2744;cursor:pointer;">Cancel</button>
+      <button id="dlConfirm" style="font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:8px 18px;border-radius:8px;border:none;background:#a63040;color:#fff;cursor:pointer;">Delete</button>
+    </div></div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('dlCancel').onclick = ()=>document.body.removeChild(overlay);
+  document.getElementById('dlConfirm').onclick = ()=>{
+    document.body.removeChild(overlay);
+    customLists = customLists.filter(l=>l.id!==id);
+    if (activeListId===id) activeListId=null;
+    saveAll(); renderList();
   };
+}
 
-  if (editIdx >= 0) {
-    // Güncelleme
-    set(ref(db, 'words/' + words[editIdx].id), entry);
+/* ── Add-to-list popover ── */
+let atlWordIdx = -1;
+function openAtlPopover(e, wordIdx) {
+  atlWordIdx = wordIdx;
+  const pop = document.getElementById('atlPopover');
+  const items = document.getElementById('atlItems');
+  const wKey = words[wordIdx]?.word.toLowerCase();
+
+  if (!customLists.length) {
+    items.innerHTML = `<div style="padding:6px 10px;font-size:12px;color:var(--text3);">No lists yet. Create one first.</div>
+      <div style="padding:4px 8px 8px;"><button onclick="closeAtlPopover();openNewListModal();" style="font-family:'Inter',sans-serif;font-size:12px;padding:5px 14px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--navy);cursor:pointer;width:100%;">+ New List</button></div>`;
   } else {
-    // Yeni Ekleme
-    push(wordsRef, entry);
+    items.innerHTML = customLists.map(lst => {
+      const inList = (lst.wordKeys||[]).includes(wKey);
+      return `<div class="atl-item ${inList?'in-list':''}" onclick="toggleWordInList('${lst.id}',${wordIdx})">
+        <span>${lst.name}</span>
+        <span class="atl-item-check">${inList?'✓':''}</span>
+      </div>`;
+    }).join('') + `<div style="border-top:1px solid var(--border);margin-top:4px;padding-top:4px;">
+      <div class="atl-item" style="color:var(--blue);" onclick="closeAtlPopover();openNewListModal();">+ New List</div>
+    </div>`;
   }
-  closeWordModal();
-};
 
-// KELİME SİLME (Firebase'den)
-window.deleteWord = function(i) {
-  if(confirm('Are you sure?')) {
-    remove(ref(db, 'words/' + words[i].id));
+  // position near button
+  const rect = e.currentTarget.getBoundingClientRect();
+  pop.style.display = 'block';
+  const pw = 190, ph = pop.offsetHeight || 160;
+  const x = Math.min(rect.left, window.innerWidth - pw - 10);
+  const y = rect.bottom + 6 + ph > window.innerHeight ? rect.top - ph - 6 : rect.bottom + 6;
+  pop.style.left = x + 'px';
+  pop.style.top  = y + 'px';
+
+  setTimeout(()=>document.addEventListener('click', closeAtlOnOutside), 50);
+}
+
+function closeAtlPopover() {
+  document.getElementById('atlPopover').style.display = 'none';
+  document.removeEventListener('click', closeAtlOnOutside);
+}
+function closeAtlOnOutside(e) {
+  if (!document.getElementById('atlPopover').contains(e.target)) closeAtlPopover();
+}
+
+function toggleWordInList(listId, wordIdx) {
+  const lst = customLists.find(l=>l.id===listId);
+  if (!lst || !words[wordIdx]) return;
+  const wKey = words[wordIdx].word.toLowerCase();
+  if (!lst.wordKeys) lst.wordKeys = [];
+  if (lst.wordKeys.includes(wKey)) {
+    lst.wordKeys = lst.wordKeys.filter(k=>k!==wKey);
+  } else {
+    lst.wordKeys.push(wKey);
   }
-};
+  saveAll();
+  // refresh popover in place
+  const items = document.getElementById('atlItems');
+  items.innerHTML = customLists.map(l => {
+    const inL = (l.wordKeys||[]).includes(wKey);
+    return `<div class="atl-item ${inL?'in-list':''}" onclick="toggleWordInList('${l.id}',${wordIdx})">
+      <span>${l.name}</span><span class="atl-item-check">${inL?'✓':''}</span></div>`;
+  }).join('') + `<div style="border-top:1px solid var(--border);margin-top:4px;padding-top:4px;">
+    <div class="atl-item" style="color:var(--blue);" onclick="closeAtlPopover();openNewListModal();">+ New List</div></div>`;
+  renderCustomListsPanel();
+}
 
-// ... Diğer tüm renderCard, renderList ve switchView fonksiyonlarını 
-// Claude'un orijinal kodundaki gibi buraya ekleyebilirsin.
+/* ══════════════════════════════════════════════
+   TEXT STUDY
+══════════════════════════════════════════════ */
+function renderTextList() {
+  const el=document.getElementById('textEntries');
+  if (!texts.length){
+    el.innerHTML=`<div class="text-no-entries">No texts yet.<br>Add a text to begin.</div>`;
+    return;
+  }
+  el.innerHTML=texts.map((t,i)=>`
+    <div class="text-entry ${activeTextIdx===i?'active':''}" onclick="selectText(${i})">
+      <div class="text-entry-title">${t.title}</div>
+      <div class="text-entry-meta">${t.body.length} chars · ${new Date(t.createdAt).toLocaleDateString('tr-TR')}</div>
+      <div class="text-entry-actions">
+        <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteText(${i})">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+function selectText(i) {
+  activeTextIdx = i;
+  aiWords = [];
+  addedChips = new Set();
+  selectedChips = new Set();
+  renderTextList();
+  renderTextReader();
+}
+
+function renderTextReader() {
+  const panel = document.getElementById('textReaderPanel');
+  if (activeTextIdx < 0 || activeTextIdx >= texts.length) {
+    panel.innerHTML=`<div style="text-align:center;padding:3rem 1rem;color:var(--text3);">
+      <div style="font-size:40px;margin-bottom:1rem;">📄</div>
+      <div style="font-size:15px;font-weight:500;color:var(--navy);margin-bottom:6px;">Select a text to study</div>
+      <div style="font-size:13px;">Add a text from the left panel and start analyzing.</div>
+    </div>`;
+    return;
+  }
+  const t = texts[activeTextIdx];
+
+  const selCount = selectedChips.size;
+  const chipsHTML = aiWords.length
+    ? `<div class="ai-words-section">
+        <div class="ai-words-top">
+          <div class="ai-words-label">${aiWords.length} key words found — hover &amp; click to select</div>
+          <div class="ai-select-count"><strong>${selCount}</strong> selected</div>
+        </div>
+        <div class="ai-word-chips">${aiWords.map((w,i)=>{
+          const key     = w.word.toLowerCase();
+          const isAdded    = addedChips.has(key);
+          const isSelected = selectedChips.has(key);
+          const cls = isAdded ? 'already-added' : isSelected ? 'selected' : '';
+          const preview = [
+            w.definition ? `<em>${w.definition}</em>` : '',
+            (w.synonyms||w.synonym) ? `<span style="color:#a78bfa">≈ ${(w.synonyms||w.synonym).split(',').slice(0,3).map(s=>s.split('|')[0].trim()).join(', ')}</span>` : '',
+            w.family ? `<span style="color:#86efac;font-size:10px">${w.family.split(',').slice(0,2).join(', ')}</span>` : ''
+          ].filter(Boolean).join('<br>');
+          return `<div class="ai-word-chip ${cls}" id="chip-${i}"
+            onclick="${isAdded?'':'toggleChip('+i+')'}">
+            <span class="chip-hover-label">Select</span>
+            ${w.word}
+            ${w.type?`<span class="chip-type">${w.type}</span>`:''}
+            <span class="chip-check">✓</span>
+            ${preview?`<span class="chip-preview">${preview}</span>`:''}
+          </div>`;
+        }).join('')}</div>
+        <div class="ai-add-selected-bar ${selCount===0?'hidden':''}" id="addSelectedBar">
+          <div class="ai-add-info">
+            <strong>${selCount} word${selCount!==1?'s':''} selected</strong>
+            <span>will be added to Word List &amp; Flashcards automatically</span>
+          </div>
+          <button class="btn-add-selected" onclick="addSelectedWords()">
+            ＋ Add ${selCount} Word${selCount!==1?'s':''} to List
+          </button>
+        </div>
+      </div>`
+    : '';
+
+  panel.innerHTML=`
+  <div class="text-viewer-card">
+    <div class="text-viewer-top">
+      <div class="text-viewer-title">${t.title}</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-sm btn-danger" onclick="deleteText(${activeTextIdx})">Delete</button>
+      </div>
+    </div>
+    <div class="text-viewer-body">
+      <div class="text-content" id="textContent">${escapeHtml(t.body)}</div>
+    </div>
+    <div class="text-viewer-footer">
+      <div class="analyze-bar">
+        <button class="btn btn-purple" id="analyzeBtn" onclick="analyzeText()">
+          ✦ Analyze with AI
+        </button>
+        <span class="analyze-status" id="analyzeStatus">
+          Extract key vocabulary from this text automatically
+        </span>
+      </div>
+      ${chipsHTML}
+    </div>
+  </div>`;
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function deleteText(i) {
+  const t = texts[i];
+  if (!t) return;
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `position:fixed;inset:0;background:rgba(15,25,60,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);`;
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:16px;border:1px solid #dde3f0;box-shadow:0 8px 40px rgba(26,39,68,0.18);padding:2rem;max-width:380px;width:90%;font-family:'Inter',sans-serif;">
+      <div style="font-size:15px;font-weight:600;color:#1a2744;margin-bottom:8px;">Delete text?</div>
+      <div style="font-size:14px;color:#4a5878;margin-bottom:1.5rem;">
+        <strong style="color:#1a2744">"${t.title}"</strong> will be permanently removed.
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="delTCancel" style="font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:8px 18px;border-radius:8px;border:1px solid #c2cce0;background:transparent;color:#1a2744;cursor:pointer;">Cancel</button>
+        <button id="delTConfirm" style="font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:8px 18px;border-radius:8px;border:none;background:#a63040;color:#fff;cursor:pointer;">Delete</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('delTCancel').onclick  = () => document.body.removeChild(overlay);
+  document.getElementById('delTConfirm').onclick = () => {
+    document.body.removeChild(overlay);
+    texts.splice(i, 1);
+    if (activeTextIdx === i) activeTextIdx = -1;
+    else if (activeTextIdx > i) activeTextIdx--;
+    saveAll();
+    renderTextList();
+    renderTextReader();
+  };
+}
+
+/* ── AI ANALYZE ── */
+async function analyzeText() {
+  if (activeTextIdx<0) return;
+  const t = texts[activeTextIdx];
+  const btn = document.getElementById('analyzeBtn');
+  const status = document.getElementById('analyzeStatus');
+  if (!btn || !status) return;
+
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner"></span> Analyzing...`;
+  status.className = 'analyze-status running';
+  status.textContent = 'AI is reading the text and finding key vocabulary...';
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{
+          role: 'user',
+          content: `You are a vocabulary teacher helping an Industrial Engineering student (Turkish, intermediate English) study English texts.
+
+Analyze the following text and extract ALL important, challenging, or useful vocabulary words an engineering student should learn. Be comprehensive — do not limit the number. Include:
+- Technical and academic vocabulary
+- Subject-specific terminology
+- Useful collocations and phrases
+- Any word that is not basic everyday English
+- Words important for understanding the text's meaning or field
+
+For each word provide:
+- word: base/dictionary form, lowercase
+- type: one of noun / verb / adjective / adverb / phrasal verb
+- definition: one short, simple English sentence explaining the word (max 12 words)
+- synonyms: 3-5 synonyms/near-meanings, comma-separated, each followed by | and its Turkish translation — e.g. "improve | geliştirmek, enhance | iyileştirmek"
+- family: 3-5 related word forms, comma-separated, each with its type in parentheses followed by | and Turkish translation — e.g. "efficient (adj) | verimli, efficiently (adv) | verimli şekilde, inefficiency (n) | verimsizlik"
+- examples: array of exactly 2 short example sentences using the word naturally; sentences should be relevant to engineering or industrial contexts when possible
+
+Respond ONLY with a valid JSON array, no other text, no markdown fences:
+[{"word":"...","type":"...","definition":"...","synonyms":"...","family":"...","examples":["...","..."]}]
+
+TEXT:
+${t.body.substring(0, 4000)}`
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const raw = data.content.map(c=>c.text||'').join('');
+    const cleaned = raw.replace(/```json|```/g,'').trim();
+    aiWords = JSON.parse(cleaned);
+    addedChips = new Set();
+    selectedChips = new Set();
+    // mark words already in word list
+    words.forEach(w => addedChips.add(w.word.toLowerCase()));
+
+    status.className = 'analyze-status done';
+    status.textContent = `${aiWords.length} key words found — click any word to add to your list`;
+    btn.disabled = false;
+    btn.innerHTML = '✦ Re-analyze';
+    renderTextReader();
+
+  } catch(err) {
+    console.error(err);
+    status.className = 'analyze-status error';
+    status.textContent = 'Analysis failed. Check your connection and try again.';
+    btn.disabled = false;
+    btn.innerHTML = '✦ Analyze with AI';
+  }
+}
+
+/* ── TOGGLE CHIP SELECTION ── */
+function toggleChip(i) {
+  const w = aiWords[i];
+  if (!w) return;
+  const key = w.word.toLowerCase();
+  if (addedChips.has(key)) return;
+  if (selectedChips.has(key)) {
+    selectedChips.delete(key);
+  } else {
+    selectedChips.add(key);
+  }
+  // update chip UI without full re-render
+  const chip = document.getElementById(`chip-${i}`);
+  if (chip) {
+    chip.classList.toggle('selected', selectedChips.has(key));
+    // show/hide check
+    const check = chip.querySelector('.chip-check');
+    if (check) check.style.display = selectedChips.has(key) ? 'inline' : 'none';
+  }
+  // update count + bar
+  const countEl = document.querySelector('.ai-select-count');
+  if (countEl) countEl.innerHTML = `<strong>${selectedChips.size}</strong> selected`;
+  const bar = document.getElementById('addSelectedBar');
+  if (bar) {
+    bar.classList.toggle('hidden', selectedChips.size === 0);
+    const btn = bar.querySelector('.btn-add-selected');
+    const info = bar.querySelector('.ai-add-info');
+    const n = selectedChips.size;
+    if (btn)  btn.textContent = `＋ Add ${n} Word${n!==1?'s':''} to List`;
+    if (info) info.innerHTML  = `<strong>${n} word${n!==1?'s':''} selected</strong><span> will be added to Word List &amp; Flashcards automatically</span>`;
+  }
+}
+
+/* ── BULK ADD SELECTED WORDS ── */
+function addSelectedWords() {
+  if (!selectedChips.size) return;
+  let addedCount = 0;
+  aiWords.forEach(w => {
+    if (!selectedChips.has(w.word.toLowerCase())) return;
+    // skip if already exists
+    if (words.find(x => x.word.toLowerCase() === w.word.toLowerCase())) {
+      addedChips.add(w.word.toLowerCase());
+      return;
+    }
+    words.push({
+      word:       w.word,
+      type:       w.type       || '',
+      turkish:    '',
+      definition: w.definition || '',
+      family:     w.family     || '',
+      synonyms:   w.synonyms   || w.synonym || '',
+      examples:   Array.isArray(w.examples) ? w.examples : (w.examples ? [w.examples] : [])
+    });
+    addedChips.add(w.word.toLowerCase());
+    addedCount++;
+  });
+  selectedChips.clear();
+  current = words.length - 1;
+  saveAll();
+  renderTextReader();
+  renderList();
+  renderCard();
+  // brief toast
+  showToast(`${addedCount} word${addedCount!==1?'s':''} added to Word List!`);
+}
+
+/* ── UNDO TOAST ── */
+let undoData = null; // { word, index, timeout }
+
+function showToast(msg, undoCallback) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    document.body.appendChild(t);
+  }
+  t.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--navy);color:#fff;font-size:13px;font-weight:500;
+    padding:10px 10px 10px 20px;border-radius:30px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.3);
+    opacity:0;transition:all 0.3s;z-index:9998;
+    font-family:'Inter',sans-serif;
+    display:flex;align-items:center;gap:12px;white-space:nowrap;`;
+  t.innerHTML = undoCallback
+    ? `<span>${msg}</span><button id="undoBtn" style="
+        font-family:'Inter',sans-serif;font-size:12px;font-weight:700;
+        background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.35);
+        padding:4px 14px;border-radius:20px;cursor:pointer;letter-spacing:0.04em;
+        transition:background 0.15s;">Geri Al</button>`
+    : `<span>${msg}</span>`;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(t._timer);
+  if (undoCallback) {
+    const btn = document.getElementById('undoBtn');
+    if (btn) {
+      btn.onmouseenter = () => btn.style.background = 'rgba(255,255,255,0.3)';
+      btn.onmouseleave = () => btn.style.background = 'rgba(255,255,255,0.18)';
+      btn.onclick = () => {
+        clearTimeout(t._timer);
+        t.style.opacity = '0';
+        t.style.transform = 'translateX(-50%) translateY(20px)';
+        undoCallback();
+      };
+    }
+  }
+  t._timer = setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 5000);
+}
+
+/* ══════════════════════════════════════════════
+   WORD MODAL
+══════════════════════════════════════════════ */
+function renderExamplesEditor() {
+  document.getElementById('examplesEditor').innerHTML = tempExamples.map((ex,i)=>`
+    <div class="example-row">
+      <textarea rows="2" placeholder="Example sentence ${i+1}...">${ex}</textarea>
+      <button class="remove-ex" onclick="removeEx(${i})">×</button>
+    </div>`).join('');
+}
+function removeEx(i)    { syncExamples(); tempExamples.splice(i,1); renderExamplesEditor(); }
+function syncExamples() { document.querySelectorAll('#examplesEditor textarea').forEach((ta,i)=>{ tempExamples[i]=ta.value; }); }
+function addEx() {
+  syncExamples(); tempExamples.push(''); renderExamplesEditor();
+  setTimeout(()=>{ const rows=document.querySelectorAll('#examplesEditor textarea'); if(rows.length) rows[rows.length-1].focus(); },50);
+}
+
+function openWordModal(prefill) {
+  editIdx=-1; quickAddWord=null;
+  document.getElementById('wordModalTitle').textContent='Add New Word';
+  document.getElementById('quickAddInfo').style.display='none';
+  ['fWord','fTr','fDef','fFamily','fSyn'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fType').value='';
+  if (prefill) {
+    document.getElementById('fWord').value=prefill.word||'';
+    document.getElementById('fType').value=prefill.type||'';
+    document.getElementById('fSyn').value=prefill.synonym||'';
+  }
+  tempExamples=[''];
+  renderExamplesEditor();
+  document.getElementById('wordModal').classList.add('open');
+  setTimeout(()=>document.getElementById('fWord').focus(),80);
+}
+
+function closeWordModal() {
+  document.getElementById('wordModal').classList.remove('open');
+  quickAddWord=null;
+}
+
+function editWord(i) {
+  editIdx=i; quickAddWord=null;
+  const w=words[i];
+  document.getElementById('wordModalTitle').textContent='Edit Word';
+  document.getElementById('quickAddInfo').style.display='none';
+  document.getElementById('fWord').value   = w.word||'';
+  document.getElementById('fType').value   = w.type||'';
+  document.getElementById('fTr').value     = w.turkish||'';
+  document.getElementById('fDef').value    = w.definition||'';
+  document.getElementById('fFamily').value = w.family||'';
+  document.getElementById('fSyn').value    = w.synonyms||'';
+  tempExamples=(w.examples&&w.examples.length)?[...w.examples]:[''];
+  renderExamplesEditor();
+  document.getElementById('wordModal').classList.add('open');
+}
+
+function saveWordEntry() {
+  const word=document.getElementById('fWord').value.trim();
+  if (!word){alert('Word field is required.');return;}
+  syncExamples();
+  const entry={
+    word,
+    type:       document.getElementById('fType').value,
+    turkish:    document.getElementById('fTr').value.trim(),
+    definition: document.getElementById('fDef').value.trim(),
+    family:     document.getElementById('fFamily').value.trim(),
+    synonyms:   document.getElementById('fSyn').value.trim(),
+    examples:   tempExamples.map(e=>e.trim()).filter(Boolean)
+  };
+  if (editIdx>=0){ words[editIdx]=entry; }
+  else { words.push(entry); current=words.length-1; }
+
+  // mark chip as added
+  if (quickAddWord) {
+    addedChips.add(quickAddWord.word);
+    // update chip UI
+    const chipIdx = aiWords.findIndex(w=>w.word===quickAddWord.word);
+    if (chipIdx>=0) {
+      const chip=document.getElementById(`chip-${chipIdx}`);
+      if(chip) chip.classList.add('added');
+    }
+  }
+  quickAddWord=null;
+  saveAll(); closeWordModal(); renderCard(); renderList();
+}
+
+function deleteWord(i) {
+  const w = words[i];
+  if (!w) return;
+  // custom confirm — native confirm() can be blocked inside iframes
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `position:fixed;inset:0;background:rgba(15,25,60,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);`;
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:16px;border:1px solid #dde3f0;box-shadow:0 8px 40px rgba(26,39,68,0.18);padding:2rem;max-width:380px;width:90%;font-family:'Inter',sans-serif;">
+      <div style="font-size:15px;font-weight:600;color:#1a2744;margin-bottom:8px;">Delete word?</div>
+      <div style="font-size:14px;color:#4a5878;margin-bottom:1.5rem;">
+        <strong style="color:#1a2744">"${w.word}"</strong> will be removed from both Flashcards and Word List.
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="delCancel" style="font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:8px 18px;border-radius:8px;border:1px solid #c2cce0;background:transparent;color:#1a2744;cursor:pointer;">Cancel</button>
+        <button id="delConfirm" style="font-family:'Inter',sans-serif;font-size:13px;font-weight:500;padding:8px 18px;border-radius:8px;border:none;background:#a63040;color:#fff;cursor:pointer;">Delete</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('delCancel').onclick  = () => document.body.removeChild(overlay);
+  document.getElementById('delConfirm').onclick = () => {
+    document.body.removeChild(overlay);
+    const deletedWord = {...w};
+    const deletedIndex = i;
+    words.splice(i, 1);
+    if (current >= words.length) current = Math.max(0, words.length - 1);
+    saveAll();
+    renderCard();
+    renderList();
+    showToast(`"${deletedWord.word}" silindi.`, () => {
+      // undo: reinsert at original position
+      words.splice(deletedIndex, 0, deletedWord);
+      current = deletedIndex;
+      saveAll();
+      renderCard();
+      renderList();
+      showToast(`"${deletedWord.word}" geri alındı.`);
+    });
+  };
+}
+
+function goCard(i) { current=i; switchView('card'); }
+
+/* ══════════════════════════════════════════════
+   ADD TEXT MODAL
+══════════════════════════════════════════════ */
+function openAddTextModal() {
+  document.getElementById('txtTitle').value='';
+  document.getElementById('txtBody').value='';
+  document.getElementById('addTextModal').classList.add('open');
+  setTimeout(()=>document.getElementById('txtTitle').focus(),80);
+}
+function closeAddTextModal() { document.getElementById('addTextModal').classList.remove('open'); }
+
+function saveText() {
+  const title=document.getElementById('txtTitle').value.trim();
+  const body=document.getElementById('txtBody').value.trim();
+  if (!title||!body){alert('Both title and text are required.');return;}
+  texts.push({ title, body, createdAt: Date.now() });
+  saveAll();
+  closeAddTextModal();
+  activeTextIdx=texts.length-1;
+  aiWords=[]; addedChips=new Set();
+  renderTextList();
+  renderTextReader();
+}
+
+/* ══════════════════════════════════════════════
+   VIEW SWITCHING
+══════════════════════════════════════════════ */
+function switchView(v) {
+  ['card','list','text'].forEach(id=>{
+    document.getElementById(id+'View').style.display = v===id?'block':'none';
+  });
+  document.getElementById('tabCard').classList.toggle('active', v==='card');
+  document.getElementById('tabList').classList.toggle('active', v==='list');
+  document.getElementById('tabText').classList.toggle('active', v==='text');
+  document.getElementById('addBtn').style.display = v==='text'?'none':'inline-flex';
+  if (v==='card') renderCard();
+  else if (v==='list') renderList();
+  else { renderTextList(); renderTextReader(); }
+}
+
+/* ══════════════════════════════════════════════
+   EVENTS
+══════════════════════════════════════════════ */
+document.getElementById('addBtn').addEventListener('click', ()=>openWordModal());
+document.getElementById('openAddText').addEventListener('click', openAddTextModal);
+document.getElementById('cancelAddText').addEventListener('click', closeAddTextModal);
+document.getElementById('saveAddText').addEventListener('click', saveText);
+document.getElementById('cancelWord').addEventListener('click', closeWordModal);
+document.getElementById('saveWord').addEventListener('click', saveWordEntry);
+document.getElementById('addExBtn').addEventListener('click', addEx);
+document.getElementById('tabCard').addEventListener('click', ()=>switchView('card'));
+document.getElementById('tabList').addEventListener('click', ()=>switchView('list'));
+document.getElementById('tabText').addEventListener('click', ()=>switchView('text'));
+document.getElementById('prevBtn').addEventListener('click', ()=>{ current=(current-1+words.length)%words.length; renderCard(); });
+document.getElementById('nextBtn').addEventListener('click', ()=>{ current=(current+1)%words.length; renderCard(); });
+
+document.getElementById('newListModal').addEventListener('click', e=>{ if(e.target===document.getElementById('newListModal')) closeNewListModal(); });
+document.getElementById('nlName')?.addEventListener('keydown', e=>{ if(e.key==='Enter') saveNewList(); if(e.key==='Escape') closeNewListModal(); });
+document.getElementById('wordModal').addEventListener('click', e=>{ if(e.target===document.getElementById('wordModal')) closeWordModal(); });
+document.getElementById('addTextModal').addEventListener('click', e=>{ if(e.target===document.getElementById('addTextModal')) closeAddTextModal(); });
+
+document.addEventListener('keydown', e=>{
+  const wm=document.getElementById('wordModal');
+  const tm=document.getElementById('addTextModal');
+  if (wm.classList.contains('open')){ if(e.key==='Escape') closeWordModal(); if(e.key==='Enter'&&e.ctrlKey) saveWordEntry(); return; }
+  if (tm.classList.contains('open')){ if(e.key==='Escape') closeAddTextModal(); return; }
+  if (document.getElementById('cardView').style.display!=='none') {
+    if(e.key==='ArrowLeft') document.getElementById('prevBtn').click();
+    if(e.key==='ArrowRight') document.getElementById('nextBtn').click();
+  }
+});
+
+/* ── CHIP PREVIEW POSITIONING ── */
+document.addEventListener('mousemove', e => {
+  const chip = e.target.closest('.ai-word-chip');
+  if (!chip) return;
+  const preview = chip.querySelector('.chip-preview');
+  if (!preview) return;
+  const x = e.clientX + 14;
+  const y = e.clientY + 18;
+  // keep within viewport
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const pw = 260, ph = preview.offsetHeight || 90;
+  preview.style.left = (x + pw > vw ? vw - pw - 12 : x) + 'px';
+  preview.style.top  = (y + ph > vh ? e.clientY - ph - 10 : y) + 'px';
+});
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+saveAll();
+renderCard();
 </script>
+<!-- NEW LIST MODAL -->
+<div class="modal-overlay" id="newListModal">
+  <div class="nl-modal">
+    <h3>New List</h3>
+    <input id="nlName" placeholder="e.g. IELTS Vocabulary, Work Terms..." maxlength="40" />
+    <div class="nl-modal-footer">
+      <button class="btn" onclick="closeNewListModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewList()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TO LIST POPOVER -->
+<div class="atl-popover" id="atlPopover" style="display:none">
+  <div class="atl-popover-title">Add to list</div>
+  <div id="atlItems"></div>
+</div>
 
 </body>
 </html>
