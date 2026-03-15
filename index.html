@@ -1766,6 +1766,8 @@ function detachNoteFromRow(k, noteIdx) {
 /* ══════════════════════════════════════════════
    WORD LIST
 ══════════════════════════════════════════════ */
+function goCard(i) { current = i; switchView('card'); }
+
 function typeClass(t) {
   if (!t) return 'other';
   const l = t.toLowerCase();
@@ -2480,19 +2482,28 @@ async function submitQuickAdd() {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 700,
-        messages: [{ role: 'user', content: `Create a complete vocabulary flashcard for: "${word}"
+        messages: [{ role: 'user', content: `Create a complete vocabulary flashcard for the English word: "${word}"
 
 ${userFamily}
 ${userSynonyms}
 
-Return ONLY valid JSON:
+Rules:
+- "type": choose one: noun / verb / adjective / adverb / phrasal verb
+- "turkish": the Turkish meaning of "${word}" (1-3 words only)
+- "definition": ONE short simple sentence, max 10 words
+- "synonyms": each entry must be: word (type) | Turkish — comma-separated
+- "family": each entry must be: word (type) | Turkish — comma-separated
+- "examples": exactly 2 short sentences, max 10 words each, use "${word}" naturally
+
+Return ONLY valid JSON, no markdown:
 {
   "word": "${word}",
-  "type": "noun|verb|adjective|adverb|phrasal verb",
-  "definition": "One clear simple sentence (max 15 words)",
-  "synonyms": "Each entry: word (type) | Turkish, comma-separated. Example: effectiveness (noun) | etkinlik, improve (verb) | geliştirmek",
-  "family": "Each entry: word (type) | Turkish, comma-separated. Example: efficient (adj) | verimli, efficiently (adv) | verimli şekilde",
-  "examples": ["Industrial engineering example 1.", "Industrial engineering example 2."]
+  "type": "...",
+  "turkish": "...",
+  "definition": "...",
+  "synonyms": "...",
+  "family": "...",
+  "examples": ["...", "..."]
 }` }]
       })
     });
@@ -2504,7 +2515,7 @@ Return ONLY valid JSON:
     words.push({
       word:       entry.word || word,
       type:       entry.type       || '',
-      turkish:    '',
+      turkish:    entry.turkish    || '',
       definition: entry.definition || '',
       family:     entry.family     || family || '',
       synonyms:   entry.synonyms   || synonyms || '',
@@ -3240,18 +3251,25 @@ async function addSelectedWord() {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 600,
-        messages: [{ role: 'user', content: `You are a vocabulary assistant for an Industrial Engineering student learning English.
+        messages: [{ role: 'user', content: `Create a vocabulary flashcard for the English word: "${word}"
 
-Create a complete flashcard entry for the English word: "${word}"
+Rules:
+- "type": noun / verb / adjective / adverb / phrasal verb
+- "turkish": Turkish meaning of "${word}" (1-3 words)
+- "definition": ONE simple sentence, max 10 words
+- "synonyms": 3-4 entries, format: word (type) | Turkish — comma-separated
+- "family": 3-4 entries, format: word (type) | Turkish — comma-separated
+- "examples": 2 short sentences max 10 words each
 
 Return ONLY valid JSON, no markdown:
 {
   "word": "${word}",
-  "type": "noun|verb|adjective|adverb|phrasal verb",
-  "definition": "One clear simple sentence explaining the word (max 15 words)",
-  "synonyms": "3-5 synonyms with their word type in parentheses then | then Turkish, comma-separated. Example: effectiveness (noun) | etkinlik, productive (adj) | verimli, improve (verb) | geliştirmek",
-  "family": "3-5 related word forms with type in parentheses then | then Turkish. Example: efficient (adj) | verimli, efficiency (n) | verimlilik",
-  "examples": ["Engineering-relevant example sentence 1.", "Engineering-relevant example sentence 2."]
+  "type": "...",
+  "turkish": "...",
+  "definition": "...",
+  "synonyms": "...",
+  "family": "...",
+  "examples": ["...", "..."]
 }` }]
       })
     });
@@ -3269,7 +3287,7 @@ Return ONLY valid JSON, no markdown:
     words.push({
       word:     entry.word,
       type:     entry.type     || '',
-      turkish:  '',
+      turkish:  entry.turkish  || '',
       definition: entry.definition || '',
       family:   entry.family   || '',
       synonyms: entry.synonyms || '',
@@ -3845,15 +3863,25 @@ async function rdAddWord() {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         model:'claude-sonnet-4-20250514', max_tokens:600,
-        messages:[{role:'user',content:`Create a flashcard for the English word: "${word}"
-Return ONLY valid JSON:
+        messages:[{role:'user',content:`Create a vocabulary flashcard for the English word: "${word}"
+
+Rules:
+- "type": noun / verb / adjective / adverb / phrasal verb
+- "turkish": Turkish meaning (1-3 words)
+- "definition": ONE simple sentence, max 10 words
+- "synonyms": 3-4 entries: word (type) | Turkish — comma-separated
+- "family": 3-4 entries: word (type) | Turkish — comma-separated
+- "examples": 2 sentences max 10 words each
+
+Return ONLY valid JSON, no markdown:
 {
   "word": "${word}",
-  "type": "noun|verb|adjective|adverb|phrasal verb",
-  "definition": "One clear simple sentence (max 15 words)",
-  "synonyms": "3-5 synonyms with their word type in parentheses then | then Turkish: effectiveness (noun) | etkinlik, improve (verb) | geliştirmek",
-  "family": "3-5 word forms: efficient (adj) | verimli, efficiency (n) | verimlilik",
-  "examples": ["Engineering example 1.", "Engineering example 2."]
+  "type": "...",
+  "turkish": "...",
+  "definition": "...",
+  "synonyms": "...",
+  "family": "...",
+  "examples": ["...", "..."]
 }`}]
       })
     });
@@ -3861,7 +3889,7 @@ Return ONLY valid JSON:
     const raw = d.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
     const entry = JSON.parse(raw);
     if (words.find(w=>w.word.toLowerCase()===entry.word.toLowerCase())) { showToast(`"${word}" is already in your Word List.`); return; }
-    words.push({ word:entry.word, type:entry.type||'', turkish:'', definition:entry.definition||'', family:entry.family||'', synonyms:entry.synonyms||'', examples:Array.isArray(entry.examples)?entry.examples:[] });
+    words.push({ word:entry.word, type:entry.type||'', turkish:entry.turkish||'', definition:entry.definition||'', family:entry.family||'', synonyms:entry.synonyms||'', examples:Array.isArray(entry.examples)?entry.examples:[] });
     current = words.length-1;
     saveAll();
     renderCard(); renderList();
