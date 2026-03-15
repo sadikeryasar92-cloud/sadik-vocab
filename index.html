@@ -211,6 +211,43 @@ header { background:var(--navy); padding:0.85rem 2rem; display:flex; align-items
 .word-row-sub  { font-size:11px; color:var(--text3); font-weight:400; margin-left:3px; }
 .word-row-tr   { font-size:11px; color:var(--text3); font-style:italic; margin-top:1px; display:block; }
 
+/* Selectable text highlighting */
+.text-content .sel-word {
+  background:#fef9c3; border-bottom:2px solid var(--amber2);
+  border-radius:2px; cursor:pointer; padding:0 1px;
+  transition:background 0.12s;
+}
+.text-content .sel-word:hover { background:#fde68a; }
+
+/* Word selection popover */
+.sel-popover {
+  position:fixed; z-index:9995;
+  background:var(--navy); color:#fff;
+  border-radius:10px; padding:8px 10px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.35);
+  display:none; flex-direction:column; gap:6px;
+  min-width:160px;
+}
+.sel-popover.open { display:flex; }
+.sel-popover-word { font-family:'Playfair Display',serif; font-size:16px; font-weight:600; padding:0 4px 4px; border-bottom:1px solid rgba(255,255,255,0.15); }
+.sel-popover-btn {
+  font-family:'Inter',sans-serif; font-size:12px; font-weight:500;
+  padding:6px 10px; border-radius:7px; border:none; cursor:pointer;
+  text-align:left; transition:background 0.12s;
+}
+.sel-popover-btn.add   { background:var(--blue2); color:#fff; }
+.sel-popover-btn.add:hover { background:#2563eb; }
+.sel-popover-btn.exists { background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.6); cursor:default; }
+.sel-popover-btn.cancel { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.7); }
+.sel-popover-btn.cancel:hover { background:rgba(255,255,255,0.15); }
+
+/* Clickable words in definition */
+.definition-text .def-word {
+  cursor:pointer; border-bottom:1px dashed var(--border2);
+  transition:border-color 0.12s, background 0.12s; border-radius:2px; padding:0 1px;
+}
+.definition-text .def-word:hover { background:#edf1fc; border-bottom-color:var(--blue2); }
+
 /* Definition section */
 .definition-section { padding:1.25rem 1.75rem; border-top:1px solid var(--border); background:var(--surface); }
 .definition-label { font-size:10px; text-transform:uppercase; letter-spacing:0.16em; font-weight:700; color:var(--navy); margin-bottom:6px; display:flex; align-items:center; gap:7px; opacity:0.55; }
@@ -501,7 +538,357 @@ header { background:var(--navy); padding:0.85rem 2rem; display:flex; align-items
 .btn-add-selected:active { transform:scale(0.97); }
 .btn-add-selected:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
 
-/* Loading spinner */
+/* ════════════ DAILY WORKOUT ════════════ */
+.workout-wrap { max-width:680px; margin:0 auto; }
+
+/* top bar */
+.wo-topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:1.5rem; flex-wrap:wrap; }
+.wo-topbar-left { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+
+/* timer ring */
+.wo-timer-ring { position:relative; width:60px; height:60px; flex-shrink:0; }
+.wo-timer-ring svg { transform:rotate(-90deg); }
+.wo-timer-ring circle { fill:none; stroke-width:4; }
+.wo-timer-track { stroke:var(--border); }
+.wo-timer-fill  { stroke:var(--blue2); stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.wo-timer-ring.danger .wo-timer-fill { stroke:var(--rose); }
+.wo-timer-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--navy); }
+
+/* goal pills */
+.wo-goal-bar { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:10px 16px; display:flex; align-items:center; gap:12px; box-shadow:var(--shadow2); }
+.wo-goal-label { font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:0.1em; font-weight:600; }
+.wo-goal-mins { font-family:'Playfair Display',serif; font-size:22px; color:var(--navy); font-weight:600; }
+.wo-goal-sub   { font-size:11px; color:var(--text3); }
+.wo-goal-progress { flex:1; min-width:80px; }
+.wo-goal-bar-track { height:5px; background:var(--border); border-radius:3px; overflow:hidden; }
+.wo-goal-bar-fill  { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--blue2),var(--teal2)); transition:width 0.5s ease; }
+
+/* stats row */
+.wo-stats { display:flex; gap:8px; margin-bottom:1.5rem; flex-wrap:wrap; }
+.wo-stat { flex:1; min-width:80px; background:var(--surface); border:1px solid var(--border); border-radius:11px; padding:12px 14px; text-align:center; box-shadow:var(--shadow2); }
+.wo-stat-num { font-family:'Playfair Display',serif; font-size:24px; font-weight:600; color:var(--navy); line-height:1; }
+.wo-stat-lbl { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text3); font-weight:600; margin-top:3px; }
+.wo-stat.due     .wo-stat-num { color:var(--blue); }
+.wo-stat.correct .wo-stat-num { color:var(--teal2); }
+.wo-stat.wrong   .wo-stat-num { color:var(--rose); }
+.wo-stat.streak  .wo-stat-num { color:var(--amber2); }
+
+/* mode picker */
+.wo-mode-picker { display:flex; gap:8px; margin-bottom:1.75rem; flex-wrap:wrap; }
+.wo-mode-btn {
+  flex:1; min-width:120px; padding:14px 12px; border-radius:14px;
+  border:1.5px solid var(--border); background:var(--surface);
+  cursor:pointer; transition:all 0.15s; text-align:center; font-family:'Inter',sans-serif;
+}
+.wo-mode-btn:hover { border-color:var(--border2); box-shadow:var(--shadow2); transform:translateY(-1px); }
+.wo-mode-btn.active { border-color:var(--blue2); background:#edf1fc; }
+.wo-mode-btn.active.mode-test { border-color:#8b5cf6; background:#f3eeff; }
+.wo-mode-icon { font-size:22px; margin-bottom:5px; }
+.wo-mode-name { font-size:13px; font-weight:600; color:var(--navy); }
+.wo-mode-desc { font-size:11px; color:var(--text3); margin-top:2px; }
+
+/* start bar */
+.wo-start-bar { display:flex; align-items:center; gap:12px; margin-bottom:1.75rem; flex-wrap:wrap; }
+.wo-source-select { font-family:'Inter',sans-serif; font-size:13px; padding:8px 14px; border:1px solid var(--border2); border-radius:9px; background:var(--surface); color:var(--text); outline:none; cursor:pointer; }
+.wo-count-select { font-family:'Inter',sans-serif; font-size:13px; padding:8px 14px; border:1px solid var(--border2); border-radius:9px; background:var(--surface); color:var(--text); outline:none; cursor:pointer; }
+.wo-start-btn { padding:9px 28px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; background:var(--navy); color:#fff; border:none; border-radius:9px; cursor:pointer; transition:all 0.15s; }
+.wo-start-btn:hover { background:var(--blue); }
+
+/* progress bar */
+.wo-progress-wrap { margin-bottom:1.5rem; }
+.wo-progress-label { display:flex; justify-content:space-between; font-size:12px; color:var(--text2); margin-bottom:5px; font-weight:500; }
+.wo-progress-bar { height:5px; background:var(--border); border-radius:3px; overflow:hidden; }
+.wo-progress-fill { height:100%; border-radius:3px; transition:width 0.4s ease; }
+.wo-progress-fill.recall { background:linear-gradient(90deg,var(--blue),var(--blue2)); }
+.wo-progress-fill.fill   { background:linear-gradient(90deg,var(--teal),var(--teal2)); }
+.wo-progress-fill.test   { background:linear-gradient(90deg,#6d28d9,#8b5cf6); }
+
+/* card */
+.wo-card { background:var(--surface); border:1.5px solid var(--border); border-radius:20px; box-shadow:var(--shadow); overflow:hidden; margin-bottom:1.5rem; transition:border-color 0.2s; }
+.wo-card.correct  { border-color:#22c55e; }
+.wo-card.wrong    { border-color:#f43f5e; }
+.wo-card-stripe   { height:5px; }
+.wo-card-body     { padding:1.75rem 2rem; }
+
+/* phase badge */
+.wo-phase { display:inline-flex; align-items:center; gap:6px; font-size:10px; text-transform:uppercase; letter-spacing:0.14em; font-weight:700; border-radius:20px; padding:3px 14px; margin-bottom:1.25rem; }
+.wo-phase.recall { color:var(--blue);   background:#edf1fc; border:1px solid #c8d5f5; }
+.wo-phase.fill   { color:var(--teal);   background:#e8f5ee; border:1px solid #a8d5bc; }
+.wo-phase.test   { color:#6d28d9;       background:#f3eeff; border:1px solid #d4bdf5; }
+.wo-phase.mc     { color:var(--amber);  background:#fef3c7; border:1px solid #fde68a; }
+.wo-phase-dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+/* level pips */
+.wo-level { display:flex; align-items:center; gap:6px; margin-bottom:1rem; }
+.wo-level-lbl { font-size:11px; color:var(--text3); }
+.wo-level-pips { display:flex; gap:3px; }
+.wo-pip { width:14px; height:6px; border-radius:3px; background:var(--border); }
+.wo-pip.active { background:var(--blue2); }
+
+/* prompt */
+.wo-prompt-label { font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--text3); font-weight:600; margin-bottom:8px; }
+.wo-prompt-text  { font-family:'Playfair Display',serif; font-size:30px; color:var(--navy); line-height:1.25; margin-bottom:8px; }
+.wo-prompt-sub   { font-size:14px; color:var(--text2); margin-bottom:1.5rem; font-style:italic; }
+.wo-hint         { font-size:12px; color:var(--text3); margin-bottom:1rem; }
+.wo-hint strong  { color:var(--text2); }
+
+/* text input */
+.wo-input-wrap { display:flex; gap:10px; align-items:stretch; margin-bottom:1rem; }
+.wo-input { flex:1; padding:12px 16px; font-size:17px; font-family:'Inter',sans-serif; border:2px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); outline:none; transition:border-color 0.15s, background 0.15s; }
+.wo-input:focus   { border-color:var(--blue2); background:#fff; }
+.wo-input.correct { border-color:#22c55e; background:#f0fdf4; }
+.wo-input.wrong   { border-color:#f43f5e; background:#fff1f2; }
+
+.wo-submit { padding:12px 24px; font-family:'Inter',sans-serif; font-size:14px; font-weight:600; background:var(--navy); color:#fff; border:none; border-radius:10px; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+.wo-submit:hover  { background:var(--blue); }
+.wo-submit:active { transform:scale(0.97); }
+.wo-submit.test   { background:#6d28d9; }
+.wo-submit.test:hover { background:#7c3aed; }
+
+/* multiple choice */
+.wo-mc-options { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:1rem; }
+.wo-mc-btn {
+  padding:14px 16px; font-family:'Inter',sans-serif; font-size:14px; font-weight:500;
+  border:2px solid var(--border); border-radius:12px; background:var(--surface);
+  color:var(--text); cursor:pointer; text-align:left; transition:all 0.15s; line-height:1.4;
+}
+.wo-mc-btn:hover:not(:disabled) { border-color:var(--border2); background:var(--bg); }
+.wo-mc-btn.correct { border-color:#22c55e; background:#f0fdf4; color:#14532d; }
+.wo-mc-btn.wrong   { border-color:#f43f5e; background:#fff1f2; color:#881337; }
+.wo-mc-btn.reveal  { border-color:#22c55e; background:#f0fdf4; color:#14532d; opacity:0.7; }
+.wo-mc-btn:disabled { cursor:default; }
+
+/* feedback */
+.wo-feedback { display:none; padding:12px 16px; border-radius:10px; font-size:14px; line-height:1.6; margin-bottom:1rem; }
+.wo-feedback.correct { background:#f0fdf4; color:#14532d; border:1px solid #bbf7d0; display:block; }
+.wo-feedback.wrong   { background:#fff1f2; color:#881337; border:1px solid #fecdd3; display:block; }
+
+/* sentence */
+.wo-sentence { font-size:16px; line-height:1.85; color:var(--text2); background:var(--bg); border-radius:10px; padding:16px 18px; margin-bottom:1.25rem; font-style:italic; }
+.wo-blank { display:inline-block; min-width:90px; border-bottom:2px solid var(--blue2); margin:0 3px; padding:0 4px; color:var(--blue); font-style:normal; font-weight:500; }
+.wo-blank.filled-correct { border-color:#22c55e; color:#14532d; }
+.wo-blank.filled-wrong   { border-color:#f43f5e; color:#881337; }
+
+/* actions */
+.wo-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:1rem; }
+.wo-skip-btn { font-size:12px; padding:6px 14px; background:none; border:1px solid var(--border2); border-radius:8px; color:var(--text3); cursor:pointer; font-family:'Inter',sans-serif; }
+.wo-skip-btn:hover { color:var(--text2); background:var(--surface2); }
+
+/* done screen */
+.wo-done { text-align:center; padding:2.5rem 2rem; background:var(--surface); border:1px solid var(--border); border-radius:20px; box-shadow:var(--shadow); }
+.wo-done-emoji { font-size:52px; margin-bottom:1rem; }
+.wo-done-title { font-family:'Playfair Display',serif; font-size:26px; color:var(--navy); margin-bottom:8px; }
+.wo-done-sub   { font-size:14px; color:var(--text2); margin-bottom:1.75rem; }
+.wo-done-stats { display:flex; gap:12px; justify-content:center; margin-bottom:1.75rem; flex-wrap:wrap; }
+.wo-done-stat  { background:var(--bg); border-radius:10px; padding:12px 18px; text-align:center; }
+.wo-done-stat-num { font-size:22px; font-weight:600; font-family:'Playfair Display',serif; }
+.wo-done-stat-lbl { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:0.1em; }
+.wo-done-accuracy { font-size:32px; font-family:'Playfair Display',serif; color:var(--navy); margin-bottom:4px; }
+.wo-done-acc-lbl  { font-size:12px; color:var(--text3); margin-bottom:1.5rem; }
+
+/* empty */
+.wo-empty { text-align:center; padding:4rem 2rem; color:var(--text3); }
+.wo-empty p { font-size:15px; margin-bottom:1.25rem; color:var(--text2); }
+
+@media(max-width:540px) {
+  .wo-mc-options { grid-template-columns:1fr; }
+  .wo-mode-picker { flex-direction:column; }
+  .wo-mode-btn { min-width:unset; text-align:left; display:flex; align-items:center; gap:12px; }
+  .wo-mode-icon { font-size:18px; margin-bottom:0; }
+}
+
+/* ════════════ READING ════════════ */
+.rd-layout { display:grid; grid-template-columns:260px 1fr; gap:1.5rem; align-items:start; }
+
+/* left panel */
+.rd-panel { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow2); overflow:hidden; position:sticky; top:80px; }
+.rd-panel-header { padding:1rem 1.25rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.rd-panel-header h3 { font-size:13px; font-weight:600; color:var(--navy); }
+.rd-saved-list { max-height:460px; overflow-y:auto; }
+.rd-saved-entry { padding:10px 1.25rem; border-bottom:1px solid var(--border); cursor:pointer; transition:background 0.12s; }
+.rd-saved-entry:last-child { border-bottom:none; }
+.rd-saved-entry:hover { background:var(--bg); }
+.rd-saved-entry.active { background:#edf1fc; border-left:3px solid var(--blue2); padding-left:calc(1.25rem - 3px); }
+.rd-saved-title { font-size:13px; font-weight:600; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rd-saved-meta  { font-size:11px; color:var(--text3); margin-top:2px; display:flex; gap:8px; }
+.rd-saved-del { font-size:11px; background:none; border:none; color:var(--text3); cursor:pointer; padding:3px 6px; border-radius:5px; float:right; }
+.rd-saved-del:hover { color:var(--rose); background:#fff0f2; }
+.rd-no-saved { padding:2rem 1.25rem; text-align:center; color:var(--text3); font-size:13px; }
+
+/* right panel */
+.rd-right { display:flex; flex-direction:column; gap:1.25rem; }
+
+/* generate card */
+.rd-gen-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow2); padding:1.5rem; }
+.rd-gen-top { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:0; }
+.rd-topic-select { font-family:'Inter',sans-serif; font-size:13px; padding:8px 14px; border:1px solid var(--border2); border-radius:9px; background:var(--surface); color:var(--text); outline:none; cursor:pointer; flex:1; min-width:140px; }
+.rd-level-select { font-family:'Inter',sans-serif; font-size:13px; padding:8px 14px; border:1px solid var(--border2); border-radius:9px; background:var(--surface); color:var(--text); outline:none; cursor:pointer; }
+.rd-gen-btn { padding:9px 22px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; background:var(--navy); color:#fff; border:none; border-radius:9px; cursor:pointer; transition:all 0.15s; white-space:nowrap; display:flex; align-items:center; gap:7px; }
+.rd-gen-btn:hover { background:var(--blue); }
+.rd-gen-btn:disabled { opacity:0.6; cursor:not-allowed; }
+
+/* article card */
+.rd-article-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow2); overflow:hidden; }
+.rd-article-header { padding:1.25rem 1.75rem 1rem; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }
+.rd-article-title { font-family:'Playfair Display',serif; font-size:20px; color:var(--navy); line-height:1.3; }
+.rd-article-meta  { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.rd-meta-pill { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; padding:3px 10px; border-radius:20px; }
+.rd-meta-pill.level { background:#edf1fc; color:var(--blue); }
+.rd-meta-pill.topic { background:#e8f5ee; color:var(--teal); }
+.rd-meta-pill.words { background:#f3eeff; color:var(--purple); }
+
+.rd-article-body { padding:1.5rem 1.75rem; }
+.rd-text {
+  font-size:16px; line-height:1.95; color:var(--text2);
+  font-family:'Inter',sans-serif;
+  white-space:pre-wrap;
+}
+/* known word highlight */
+.rd-text .rd-known {
+  color:#6d28d9; font-weight:600;
+  background:#f3eeff; border-radius:3px; padding:0 2px;
+  cursor:pointer; transition:background 0.12s;
+}
+.rd-text .rd-known:hover { background:#e8d8ff; }
+/* any clickable word */
+.rd-text .rd-word {
+  cursor:pointer; border-radius:2px; padding:0 1px;
+  transition:background 0.12s;
+}
+.rd-text .rd-word:hover { background:#fef9c3; }
+
+/* stats strip */
+.rd-article-stats { display:flex; gap:16px; padding:12px 1.75rem; border-top:1px solid var(--border); background:var(--bg); flex-wrap:wrap; }
+.rd-stat-item { font-size:12px; color:var(--text3); }
+.rd-stat-item strong { color:var(--text2); font-weight:600; }
+
+/* word popup */
+.rd-word-popup {
+  position:fixed; z-index:9995;
+  background:var(--navy); color:#fff;
+  border-radius:14px; padding:14px 16px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.35);
+  min-width:200px; max-width:280px;
+  display:none; flex-direction:column; gap:8px;
+  font-family:'Inter',sans-serif;
+}
+.rd-word-popup.open { display:flex; }
+.rd-popup-word { font-family:'Playfair Display',serif; font-size:18px; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:8px; }
+.rd-popup-def  { font-size:13px; color:rgba(255,255,255,0.8); line-height:1.55; }
+.rd-popup-loading { font-size:12px; color:rgba(255,255,255,0.5); font-style:italic; }
+.rd-popup-actions { display:flex; gap:6px; padding-top:4px; }
+.rd-popup-add    { flex:1; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; padding:7px 12px; border-radius:8px; border:none; background:var(--blue2); color:#fff; cursor:pointer; transition:background 0.15s; }
+.rd-popup-add:hover { background:#2563eb; }
+.rd-popup-add.exists { background:rgba(255,255,255,0.15); color:rgba(255,255,255,0.6); cursor:default; }
+.rd-popup-listen { font-size:16px; background:rgba(255,255,255,0.1); border:none; border-radius:8px; padding:7px 10px; cursor:pointer; color:#fff; }
+.rd-popup-listen:hover { background:rgba(255,255,255,0.2); }
+.rd-popup-close  { font-size:16px; background:rgba(255,255,255,0.08); border:none; border-radius:8px; padding:7px 10px; cursor:pointer; color:rgba(255,255,255,0.7); }
+.rd-popup-close:hover { background:rgba(255,255,255,0.18); }
+
+/* quiz section */
+.rd-quiz-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow2); overflow:hidden; }
+.rd-quiz-header { padding:1.1rem 1.75rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.rd-quiz-header h3 { font-size:14px; font-weight:600; color:var(--navy); display:flex; align-items:center; gap:8px; }
+.rd-quiz-body { padding:1.5rem 1.75rem; display:flex; flex-direction:column; gap:1.5rem; }
+
+.rd-q { }
+.rd-q-text { font-size:14px; font-weight:500; color:var(--text); margin-bottom:10px; line-height:1.5; }
+.rd-q-num  { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--navy); color:#fff; font-size:11px; font-weight:700; margin-right:6px; flex-shrink:0; }
+.rd-opts   { display:flex; flex-direction:column; gap:7px; }
+.rd-opt {
+  padding:10px 14px; border-radius:10px; border:1.5px solid var(--border);
+  background:var(--surface); font-size:13px; font-family:'Inter',sans-serif;
+  color:var(--text); cursor:pointer; text-align:left; transition:all 0.15s; line-height:1.4;
+}
+.rd-opt:hover:not(:disabled) { border-color:var(--border2); background:var(--bg); }
+.rd-opt.correct  { border-color:#22c55e; background:#f0fdf4; color:#14532d; }
+.rd-opt.wrong    { border-color:#f43f5e; background:#fff1f2; color:#881337; }
+.rd-opt.reveal   { border-color:#22c55e; background:#f0fdf4; color:#14532d; opacity:0.65; }
+.rd-opt:disabled { cursor:default; }
+
+.rd-quiz-result { text-align:center; padding:1.5rem; background:var(--bg); border-radius:12px; margin-top:0.5rem; }
+.rd-quiz-score  { font-family:'Playfair Display',serif; font-size:36px; color:var(--navy); font-weight:600; }
+.rd-quiz-lbl    { font-size:13px; color:var(--text3); margin-top:4px; }
+
+/* ── Reading Audio Player ── */
+.rd-audio-bar {
+  padding:14px 1.75rem;
+  border-top:1px solid var(--border);
+  background:linear-gradient(135deg,#1a2744 0%,#2451a6 100%);
+  display:flex; flex-direction:column; gap:10px;
+}
+.rd-audio-top { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.rd-audio-title { font-size:12px; color:rgba(255,255,255,0.7); font-weight:500; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* mode selector pills */
+.rd-audio-modes { display:flex; gap:6px; flex-wrap:wrap; }
+.rd-mode-pill {
+  font-size:11px; font-weight:600; font-family:'Inter',sans-serif;
+  padding:4px 12px; border-radius:20px; border:1.5px solid rgba(255,255,255,0.25);
+  background:transparent; color:rgba(255,255,255,0.65); cursor:pointer;
+  transition:all 0.15s;
+}
+.rd-mode-pill:hover   { background:rgba(255,255,255,0.12); color:#fff; }
+.rd-mode-pill.active  { background:rgba(255,255,255,0.22); color:#fff; border-color:rgba(255,255,255,0.6); }
+
+/* controls row */
+.rd-audio-controls { display:flex; align-items:center; gap:10px; }
+.rd-play-btn {
+  width:40px; height:40px; border-radius:50%; border:none;
+  background:#fff; color:var(--navy); font-size:16px;
+  cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  transition:transform 0.15s, background 0.15s; box-shadow:0 2px 8px rgba(0,0,0,0.2);
+}
+.rd-play-btn:hover { transform:scale(1.07); background:#edf1fc; }
+.rd-play-btn:active { transform:scale(0.95); }
+
+/* progress track */
+.rd-progress-track {
+  flex:1; height:5px; background:rgba(255,255,255,0.2);
+  border-radius:3px; cursor:pointer; position:relative;
+}
+.rd-progress-fill {
+  height:100%; border-radius:3px;
+  background:linear-gradient(90deg,#60a5fa,#34d399);
+  transition:width 0.2s linear; pointer-events:none;
+}
+.rd-time { font-size:11px; color:rgba(255,255,255,0.6); white-space:nowrap; min-width:72px; text-align:right; }
+
+/* word highlight during reading */
+.rd-text .rd-speaking {
+  background:#fef08a !important; border-radius:3px;
+  outline:2px solid #f59e0b; outline-offset:1px;
+  transition:background 0.1s;
+}
+
+/* speed & voice */
+.rd-audio-options { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.rd-speed-lbl { font-size:11px; color:rgba(255,255,255,0.55); }
+.rd-speed-range {
+  -webkit-appearance:none; appearance:none;
+  width:90px; height:4px; border-radius:2px;
+  background:rgba(255,255,255,0.25); outline:none; cursor:pointer;
+}
+.rd-speed-range::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#fff; cursor:pointer; }
+.rd-speed-val { font-size:11px; color:#fff; font-weight:600; min-width:28px; }
+.rd-voice-sel {
+  font-family:'Inter',sans-serif; font-size:11px; padding:4px 10px;
+  border-radius:8px; border:1px solid rgba(255,255,255,0.25);
+  background:rgba(255,255,255,0.1); color:#fff; outline:none; cursor:pointer;
+  max-width:160px;
+}
+.rd-voice-sel option { background:#1a2744; color:#fff; }
+
+.rd-generating  { text-align:center; padding:3rem 2rem; color:var(--text3); }
+.rd-gen-anim    { font-size:32px; margin-bottom:1rem; animation:pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.95)} }
+
+@media(max-width:720px) {
+  .rd-layout { grid-template-columns:1fr; }
+  .rd-panel  { position:static; }
+  .rd-gen-top { flex-direction:column; }
+}
+/* ════════════ SPINNER ════════════ */
 .spinner { display:inline-block; width:14px; height:14px; border:2px solid #d4bdf5; border-top-color:var(--purple); border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:4px; }
 @keyframes spin { to { transform:rotate(360deg); } }
 
@@ -557,6 +944,8 @@ header { background:var(--navy); padding:0.85rem 2rem; display:flex; align-items
     <button class="vtab active" id="tabCard">Flashcard</button>
     <button class="vtab" id="tabList">Word List</button>
     <button class="vtab" id="tabText">Text Study</button>
+    <button class="vtab" id="tabWorkout">Daily Workout</button>
+    <button class="vtab" id="tabReading">Reading</button>
   </div>
 
   <!-- FLASHCARD VIEW -->
@@ -613,6 +1002,18 @@ header { background:var(--navy); padding:0.85rem 2rem; display:flex; align-items
       </div>
     </div>
   </div>
+</div>
+
+  <!-- DAILY WORKOUT VIEW -->
+  <div id="workoutView" style="display:none">
+    <div id="workoutContainer"></div>
+  </div>
+
+  <!-- READING VIEW -->
+  <div id="readingView" style="display:none">
+    <div id="readingContainer"></div>
+  </div>
+
 </div>
 
 <!-- ADD TEXT MODAL -->
@@ -676,6 +1077,42 @@ header { background:var(--navy); padding:0.85rem 2rem; display:flex; align-items
   </div>
 </div>
 
+<!-- NEW LIST MODAL -->
+<div class="modal-overlay" id="newListModal">
+  <div class="nl-modal">
+    <h3>New List</h3>
+    <input id="nlName" placeholder="e.g. IELTS Vocabulary, Work Terms..." maxlength="40" />
+    <div class="nl-modal-footer">
+      <button class="btn" onclick="closeNewListModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewList()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TO LIST POPOVER -->
+<div class="atl-popover" id="atlPopover" style="display:none">
+  <div class="atl-popover-title">Add to list</div>
+  <div id="atlItems"></div>
+</div>
+
+<!-- SELECTION POPOVER (text + definition word click) -->
+<div class="sel-popover" id="selPopover">
+  <div class="sel-popover-word" id="selPopoverWord"></div>
+  <button class="sel-popover-btn add"    id="selPopoverAdd"    onclick="addSelectedWord()">+ Add to Word List</button>
+  <button class="sel-popover-btn cancel" id="selPopoverCancel" onclick="closeSelPopover()">Cancel</button>
+</div>
+
+<!-- READING WORD POPUP -->
+<div class="rd-word-popup" id="rdWordPopup">
+  <div class="rd-popup-word" id="rdPopupWord"></div>
+  <div class="rd-popup-def"  id="rdPopupDef"><span class="rd-popup-loading">Looking up…</span></div>
+  <div class="rd-popup-actions">
+    <button class="rd-popup-add"    id="rdPopupAdd">+ Add to Word List</button>
+    <button class="rd-popup-listen" onclick="speakWord(document.getElementById('rdPopupWord').textContent)">🔊</button>
+    <button class="rd-popup-close"  onclick="closeRdPopup()">✕</button>
+  </div>
+</div>
+
 <script>
 /* ══════════════════════════════════════════════
    STORAGE
@@ -684,6 +1121,8 @@ const SK_WORDS = 'sadik_vocab_v11';
 const SK_NOTES = 'sadik_notes_v5';
 const SK_TEXTS = 'sadik_texts_v5';
 const SK_LISTS = 'sadik_lists_v1';
+const SK_SRS      = 'sadik_srs_v1';
+const SK_READINGS = 'sadik_readings_v1';
 
 const defaultWords = [
   { word:'efficiency', type:'noun', turkish:'verimlilik',
@@ -717,9 +1156,11 @@ const defaultWords = [
 let words       = JSON.parse(localStorage.getItem(SK_WORDS) || 'null') || defaultWords;
 let allNotes    = JSON.parse(localStorage.getItem(SK_NOTES) || '{}');
 let texts       = JSON.parse(localStorage.getItem(SK_TEXTS) || '[]');
-// customLists: [{id, name, wordKeys:[word.toLowerCase(),...]}]
 let customLists = JSON.parse(localStorage.getItem(SK_LISTS) || '[]');
-let activeListId = null; // null = show all
+let srsData     = JSON.parse(localStorage.getItem(SK_SRS)      || '{}');
+let readings    = JSON.parse(localStorage.getItem(SK_READINGS) || '[]');
+// readings: [{id, title, topic, level, text, wordCount, quiz, date, knownWords:[]}]
+let activeListId = null;
 
 let current       = 0;
 let editIdx       = -1;
@@ -730,12 +1171,19 @@ let addedChips    = new Set();
 let selectedChips = new Set();
 let quickAddWord  = null;
 
+function updatePill() {
+  const n = words.length;
+  document.getElementById('statsPill').textContent = n + (n===1?' word':' words');
+}
+
 function saveAll() {
   localStorage.setItem(SK_WORDS, JSON.stringify(words));
   localStorage.setItem(SK_NOTES, JSON.stringify(allNotes));
   localStorage.setItem(SK_TEXTS, JSON.stringify(texts));
   localStorage.setItem(SK_LISTS, JSON.stringify(customLists));
-  document.getElementById('statsPill').textContent = words.length + (words.length===1?' word':' words');
+  localStorage.setItem(SK_SRS,      JSON.stringify(srsData));
+  localStorage.setItem(SK_READINGS, JSON.stringify(readings));
+  updatePill();
 }
 
 /* ══════════════════════════════════════════════
@@ -786,6 +1234,13 @@ function renderCard() {
     : '<span style="font-size:13px;color:var(--text3)">—</span>';
 
   const definition = w.definition || '';
+  // wrap definition words as clickable spans
+  const definitionHTML = definition
+    ? definition.replace(/\b([a-zA-Z]{3,})\b/g, (m) => {
+        const skip = ['the','and','for','are','was','has','that','this','with','from','have','its','not','but','can','you','all','been','will','into','more','than','when','how','they','also','each','just','does','were','your','their','being','used','some'];
+        return skip.includes(m.toLowerCase()) ? m : `<span class="def-word" onclick="onDefWordClick('${m.replace(/'/g,"\\'")}',event)">${m}</span>`;
+      })
+    : '';
 
 
   const exHTML = (w.examples&&w.examples.length)
@@ -822,14 +1277,16 @@ function renderCard() {
         ${w.turkish?`<span class="turkish-text">${w.turkish}</span>`:''}
       </div>
       <div class="hero-actions">
+        <button class="btn btn-sm" title="Listen" onclick="speakWord('${w.word}')" style="padding:5px 10px;font-size:16px;">🔊</button>
+        <button class="btn btn-sm" title="Writing Practice" onclick="openWritingPrompt(${JSON.stringify({word:w.word,definition:(w.definition||'').replace(/"/g,'&quot;'),turkish:(w.turkish||'')}).replace(/'/g,'&#39;')})" style="padding:5px 11px;font-size:14px;">✏️</button>
         <button class="btn btn-sm" onclick="editWord(${current})">Edit</button>
         <button class="btn btn-sm btn-danger" onclick="deleteWord(${current})">Delete</button>
       </div>
     </div>
     ${cardBodyHTML}
-    ${definition?`<div class="definition-section">
+    ${definitionHTML?`<div class="definition-section">
       <div class="definition-label">Definition</div>
-      <div class="definition-text">${definition}</div>
+      <div class="definition-text">${definitionHTML}</div>
     </div>`:''}
     <div class="examples-section">
       <div class="examples-label"><span class="col-label-dot"></span>Example Sentences</div>
@@ -1147,6 +1604,7 @@ function renderTextReader() {
     </div>
     <div class="text-viewer-body">
       <div class="text-content" id="textContent">${escapeHtml(t.body)}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:8px;font-style:italic;">💡 Select any word in the text to add it to your Word List</div>
     </div>
     <div class="text-viewer-footer">
       <div class="analyze-bar">
@@ -1534,15 +1992,20 @@ function saveText() {
    VIEW SWITCHING
 ══════════════════════════════════════════════ */
 function switchView(v) {
-  ['card','list','text'].forEach(id=>{
-    document.getElementById(id+'View').style.display = v===id?'block':'none';
+  ['card','list','text','workout','reading'].forEach(id=>{
+    const el = document.getElementById(id+'View');
+    if (el) el.style.display = v===id?'block':'none';
   });
   document.getElementById('tabCard').classList.toggle('active', v==='card');
   document.getElementById('tabList').classList.toggle('active', v==='list');
   document.getElementById('tabText').classList.toggle('active', v==='text');
-  document.getElementById('addBtn').style.display = v==='text'?'none':'inline-flex';
+  document.getElementById('tabWorkout').classList.toggle('active', v==='workout');
+  document.getElementById('tabReading').classList.toggle('active', v==='reading');
+  document.getElementById('addBtn').style.display = (v==='text'||v==='workout'||v==='reading')?'none':'inline-flex';
   if (v==='card') renderCard();
   else if (v==='list') renderList();
+  else if (v==='workout') { woSession=[]; renderWorkout(); }
+  else if (v==='reading') renderReading();
   else { renderTextList(); renderTextReader(); }
 }
 
@@ -1559,6 +2022,8 @@ document.getElementById('addExBtn').addEventListener('click', addEx);
 document.getElementById('tabCard').addEventListener('click', ()=>switchView('card'));
 document.getElementById('tabList').addEventListener('click', ()=>switchView('list'));
 document.getElementById('tabText').addEventListener('click', ()=>switchView('text'));
+document.getElementById('tabWorkout').addEventListener('click', ()=>switchView('workout'));
+document.getElementById('tabReading').addEventListener('click', ()=>switchView('reading'));
 document.getElementById('prevBtn').addEventListener('click', ()=>{ current=(current-1+words.length)%words.length; renderCard(); });
 document.getElementById('nextBtn').addEventListener('click', ()=>{ current=(current+1)%words.length; renderCard(); });
 
@@ -1594,28 +2059,1503 @@ document.addEventListener('mousemove', e => {
 });
 
 /* ══════════════════════════════════════════════
+   DAILY WORKOUT — FULL ENGINE
+══════════════════════════════════════════════ */
+
+const SRS_INTERVALS = [0, 1, 3, 7, 14, 30];
+const DAILY_GOAL_MS = 25 * 60 * 1000; // 25 minutes
+
+// ── SRS helpers ──
+function getSRS(k) { return srsData[k] || { level:1, nextReview:0, streak:0, totalCorrect:0 }; }
+function saveSRS(k, d) { srsData[k] = d; localStorage.setItem(SK_SRS, JSON.stringify(srsData)); }
+function advanceSRS(k, ok) {
+  const s = getSRS(k);
+  if (ok) { s.level = Math.min(5, s.level+1); s.streak = (s.streak||0)+1; s.totalCorrect = (s.totalCorrect||0)+1; }
+  else     { s.level = Math.max(1, s.level-1); s.streak = 0; }
+  s.nextReview = Date.now() + (SRS_INTERVALS[s.level]||1)*86400000;
+  saveSRS(k, s);
+}
+
+// ── Build full item pool (main words + synonyms + family) ──
+function buildItemPool(sourceFilter) {
+  // sourceFilter: 'due'|'all'|'synonyms'|'family'|'mixed'
+  const now = Date.now();
+  let pool = [];
+
+  const mainWords = sourceFilter === 'due'
+    ? words.filter(w => getSRS(w.word.toLowerCase()).nextReview <= now)
+    : words;
+
+  mainWords.forEach(w => {
+    // main word recall item
+    if (w.turkish) pool.push({ type:'recall', word:w.word, answer:w.word, prompt:w.turkish, promptLabel:'Turkish meaning:', hint:`${w.word.length} letters · starts with "${w.word[0].toUpperCase()}"`, definition:w.definition||'', examples:w.examples||[], wordObj:w, srsKey:w.word.toLowerCase() });
+
+    if (sourceFilter !== 'family') {
+      // synonym items — show English word, ask for synonym
+      if (w.synonyms) {
+        w.synonyms.split(',').forEach(s => {
+          const parts = s.split('|');
+          const eng = parts[0].trim();
+          const tr  = parts[1]?.trim() || '';
+          if (!eng) return;
+          pool.push({ type:'recall', word:eng, answer:eng, prompt: tr || `A synonym of "${w.word}"`, promptLabel: tr ? 'Turkish meaning:' : 'Synonym of:', hint:`${eng.length} letters · starts with "${eng[0].toUpperCase()}"`, definition:`Synonym of ${w.word}`, examples:[], wordObj:w, srsKey:`syn_${eng.toLowerCase()}` });
+        });
+      }
+    }
+    if (sourceFilter !== 'synonyms') {
+      // family items
+      if (w.family) {
+        w.family.split(',').forEach(s => {
+          const pipeParts = s.split('|');
+          const engPart = pipeParts[0].trim();
+          const tr = pipeParts[1]?.trim() || '';
+          const m = engPart.match(/^(.+?)\s*(\(.*\))\s*$/);
+          const eng = m ? m[1].trim() : engPart;
+          const pos = m ? m[2] : '';
+          if (!eng || eng.toLowerCase() === w.word.toLowerCase()) return;
+          pool.push({ type:'recall', word:eng, answer:eng, prompt: tr || `Word family of "${w.word}" ${pos}`, promptLabel: tr ? 'Turkish meaning:' : 'Word family:', hint:`${eng.length} letters · starts with "${eng[0].toUpperCase()}" · ${pos}`, definition:`${pos} form of ${w.word}`, examples:[], wordObj:w, srsKey:`fam_${eng.toLowerCase()}` });
+        });
+      }
+    }
+    // fill-in-blank items (only for main words with examples)
+    if (w.examples && w.examples.length) {
+      const sent = buildSentenceWithBlank(w.word, w.examples);
+      if (sent) pool.push({ type:'fill', word:w.word, answer:w.word, sentence:sent, wordObj:w, srsKey:w.word.toLowerCase() });
+    }
+  });
+
+  return pool;
+}
+
+function buildMCOptions(correctAnswer, pool, count=4) {
+  const others = pool
+    .map(i => i.answer)
+    .filter(a => a.toLowerCase() !== correctAnswer.toLowerCase())
+    .filter((v,i,a) => a.indexOf(v)===i);
+  const shuffled = others.sort(()=>Math.random()-0.5).slice(0, count-1);
+  const opts = [...shuffled, correctAnswer].sort(()=>Math.random()-0.5);
+  return opts;
+}
+
+function buildSentenceWithBlank(word, examples) {
+  if (!examples || !examples.length) return null;
+  for (const ex of examples) {
+    const re = new RegExp(`\\b${word.replace(/[-\/\\^$*+?.()|[\]{}]/g,'\\$&')}(s|es|ed|ing|d)?\\b`, 'i');
+    if (re.test(ex)) return ex.replace(re, '___');
+  }
+  return null;
+}
+
+// ── Session state ──
+let woMode      = 'practice';  // 'practice'|'test'
+let woSource    = 'due';
+let woCount     = 20;
+let woSession   = [];
+let woIdx       = 0;
+let woCorrect   = 0;
+let woWrong     = 0;
+let woAnswered  = false;
+let woActive    = false;
+let woStartTime = 0;
+let woElapsed   = 0;
+let woTimerInt  = null;
+let woTodayMs   = parseInt(localStorage.getItem('wo_today_ms')||'0');
+let woTodayDate = localStorage.getItem('wo_today_date')||'';
+
+function getWoStreak() { return parseInt(localStorage.getItem('wo_streak')||'0'); }
+
+function resetDailyIfNeeded() {
+  const today = new Date().toDateString();
+  if (woTodayDate !== today) { woTodayMs = 0; woTodayDate = today; localStorage.setItem('wo_today_ms','0'); localStorage.setItem('wo_today_date',today); }
+}
+
+function startTimer() {
+  woStartTime = Date.now();
+  clearInterval(woTimerInt);
+  woTimerInt = setInterval(() => {
+    woElapsed = Date.now() - woStartTime;
+    updateTimerUI();
+    // save today progress every 5s
+    if (Math.round(woElapsed/1000) % 5 === 0) {
+      const todayTotal = woTodayMs + woElapsed;
+      localStorage.setItem('wo_today_ms', todayTotal);
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(woTimerInt);
+  woTodayMs += woElapsed;
+  localStorage.setItem('wo_today_ms', woTodayMs);
+  woElapsed = 0;
+}
+
+function updateTimerUI() {
+  const el = document.getElementById('woTimerText');
+  const fill = document.getElementById('woTimerFill');
+  const ring = document.getElementById('woTimerRing');
+  if (!el) return;
+  const remaining = Math.max(0, DAILY_GOAL_MS - woTodayMs - woElapsed);
+  const mins = Math.floor(remaining/60000);
+  const secs = Math.floor((remaining%60000)/1000);
+  el.textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+  const pct = Math.min(1, (woTodayMs + woElapsed) / DAILY_GOAL_MS);
+  const circ = 2 * Math.PI * 24;
+  if (fill) fill.style.strokeDashoffset = circ * (1 - pct);
+  if (ring) ring.classList.toggle('danger', remaining < 120000 && remaining > 0);
+  // update goal bar too
+  const gb = document.getElementById('woGoalFill');
+  if (gb) gb.style.width = (pct*100).toFixed(1)+'%';
+  const gm = document.getElementById('woGoalMins');
+  if (gm) { const done = Math.floor((woTodayMs+woElapsed)/60000); gm.textContent = `${done} / 25 dk`; }
+}
+
+// ── Main render ──
+function renderWorkout() {
+  const c = document.getElementById('workoutContainer');
+  if (!c) return;
+  resetDailyIfNeeded();
+
+  const due = words.filter(w => getSRS(w.word.toLowerCase()).nextReview <= Date.now());
+  const streak = getWoStreak();
+  const goalPct = Math.min(100, ((woTodayMs)/DAILY_GOAL_MS*100)).toFixed(1);
+  const goalDone = Math.floor(woTodayMs/60000);
+  const circ = 2 * Math.PI * 24;
+  const timerOffset = circ * (1 - Math.min(1, woTodayMs/DAILY_GOAL_MS));
+
+  if (!woActive) {
+    c.innerHTML = `
+    <div class="workout-wrap">
+      <div class="wo-topbar">
+        <div class="wo-topbar-left">
+          <div class="wo-timer-ring" id="woTimerRing">
+            <svg width="60" height="60" viewBox="0 0 60 60">
+              <circle class="wo-timer-track" cx="30" cy="30" r="24" stroke-dasharray="${circ}" stroke-dashoffset="0"/>
+              <circle class="wo-timer-fill" id="woTimerFill" cx="30" cy="30" r="24" stroke-dasharray="${circ}" stroke-dashoffset="${timerOffset}"/>
+            </svg>
+            <div class="wo-timer-text" id="woTimerText">${goalDone>=25?'✓':`${25-goalDone}dk`}</div>
+          </div>
+          <div class="wo-goal-bar">
+            <div>
+              <div class="wo-goal-label">Daily Goal</div>
+              <div class="wo-goal-mins" id="woGoalMins">${goalDone} / 25 dk</div>
+              <div class="wo-goal-sub">${goalDone>=25?'🎉 Goal reached!':'Keep going to hit your goal'}</div>
+            </div>
+            <div class="wo-goal-progress">
+              <div class="wo-goal-bar-track"><div class="wo-goal-bar-fill" id="woGoalFill" style="width:${goalPct}%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wo-stats">
+        <div class="wo-stat due"><div class="wo-stat-num">${due.length}</div><div class="wo-stat-lbl">Due Today</div></div>
+        <div class="wo-stat correct"><div class="wo-stat-num">${woCorrect}</div><div class="wo-stat-lbl">Correct</div></div>
+        <div class="wo-stat wrong"><div class="wo-stat-num">${woWrong}</div><div class="wo-stat-lbl">Wrong</div></div>
+        <div class="wo-stat streak"><div class="wo-stat-num">${streak}</div><div class="wo-stat-lbl">Streak</div></div>
+      </div>
+
+      <div class="wo-mode-picker">
+        <div class="wo-mode-btn ${woMode==='practice'?'active':''}" onclick="setWoMode('practice')">
+          <div class="wo-mode-icon">🏋️</div>
+          <div class="wo-mode-name">Practice</div>
+          <div class="wo-mode-desc">Write the answer, get instant feedback</div>
+        </div>
+        <div class="wo-mode-btn ${woMode==='mc'?'active':''}" onclick="setWoMode('mc')">
+          <div class="wo-mode-icon">🎯</div>
+          <div class="wo-mode-name">Multiple Choice</div>
+          <div class="wo-mode-desc">Pick the correct answer from 4 options</div>
+        </div>
+        <div class="wo-mode-btn ${woMode==='test'?'active mode-test':''}" onclick="setWoMode('test')">
+          <div class="wo-mode-icon">📝</div>
+          <div class="wo-mode-name">Test</div>
+          <div class="wo-mode-desc">No hints — pure knowledge check</div>
+        </div>
+      </div>
+
+      <div class="wo-start-bar">
+        <select class="wo-source-select" id="woSourceSel" onchange="woSource=this.value">
+          <option value="due" ${woSource==='due'?'selected':''}>Due today (${due.length})</option>
+          <option value="all" ${woSource==='all'?'selected':''}>All words (${words.length})</option>
+          <option value="synonyms" ${woSource==='synonyms'?'selected':''}>Main + Synonyms</option>
+          <option value="family"   ${woSource==='family'?'selected':''}>Main + Word Family</option>
+          <option value="mixed"    ${woSource==='mixed'?'selected':''}>Everything (Main + Syn + Family)</option>
+        </select>
+        <select class="wo-count-select" id="woCountSel" onchange="woCount=parseInt(this.value)">
+          <option value="10"  ${woCount===10 ?'selected':''}>10 questions</option>
+          <option value="20"  ${woCount===20 ?'selected':''}>20 questions</option>
+          <option value="30"  ${woCount===30 ?'selected':''}>30 questions</option>
+          <option value="50"  ${woCount===50 ?'selected':''}>50 questions</option>
+          <option value="999" ${woCount===999?'selected':''}>Unlimited</option>
+        </select>
+        <button class="wo-start-btn" onclick="startWorkout()">${woMode==='test'?'Start Test →':'Start →'}</button>
+      </div>
+
+      ${!words.length ? `<div class="wo-empty"><p>Add some words first to start.</p></div>` : ''}
+
+      ${(() => {
+        const weak = getWeakWords(5);
+        if (!weak.length) return '';
+        return `<div style="background:var(--surface);border:1px solid #fecdd3;border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.25rem;box-shadow:var(--shadow2);">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--rose);font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--rose);display:inline-block;"></span>Needs Practice</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            ${weak.map(({word:w,count})=>`<span style="background:#fff1f2;border:1px solid #fecdd3;border-radius:20px;padding:4px 12px;font-size:13px;color:var(--rose);cursor:pointer;" onclick="goCard(${words.indexOf(w)})" title="${count} wrong answer${count>1?'s':''}">${w.word||w} ×${count}</span>`).join('')}
+          </div>
+        </div>`;
+      })()}
+
+      ${(() => {
+        if (!scoreHistory.length) return '';
+        const recent = scoreHistory.slice(0,7).reverse();
+        const maxAcc = 100;
+        const bars = recent.map(s=>{
+          const color = s.accuracy>=80?'#22c55e':s.accuracy>=60?'#f59e0b':'#f43f5e';
+          const d = new Date(s.date);
+          const label = `${d.getMonth()+1}/${d.getDate()}`;
+          return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="font-size:10px;font-weight:600;color:${color}">${s.accuracy}%</div>
+            <div style="width:100%;background:var(--border);border-radius:3px;height:40px;display:flex;align-items:flex-end;">
+              <div style="width:100%;height:${Math.max(4,s.accuracy*0.4)}px;background:${color};border-radius:3px;transition:height 0.3s;"></div>
+            </div>
+            <div style="font-size:9px;color:var(--text3)">${label}</div>
+          </div>`;
+        }).join('');
+        return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;box-shadow:var(--shadow2);">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--blue);font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+            <span>Score History</span><span style="font-weight:400;color:var(--text3)">${scoreHistory.length} session${scoreHistory.length!==1?'s':''}</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:flex-end;">${bars}</div>
+          <div style="margin-top:10px;font-size:12px;color:var(--text3);">
+            Best: <strong style="color:var(--teal2)">${Math.max(...scoreHistory.map(s=>s.accuracy))}%</strong>
+            &nbsp;·&nbsp; Avg: <strong style="color:var(--blue)">${Math.round(scoreHistory.reduce((a,s)=>a+s.accuracy,0)/scoreHistory.length)}%</strong>
+            &nbsp;·&nbsp; Total questions: <strong style="color:var(--navy)">${scoreHistory.reduce((a,s)=>a+s.total,0)}</strong>
+          </div>
+        </div>`;
+      })()}
+    </div>`;
+    return;
+  }
+
+  // ── Active session ──
+  if (woIdx >= woSession.length) { finishWorkout(); return; }
+
+  const item = woSession[woIdx];
+  const srs  = getSRS(item.srsKey);
+  const pct  = Math.round(woIdx / woSession.length * 100);
+  const pips = [1,2,3,4,5].map(i=>`<span class="wo-pip ${i<=srs.level?'active':''}"></span>`).join('');
+  const isTest = woMode === 'test';
+
+  const progressHTML = `
+  <div class="wo-progress-wrap">
+    <div class="wo-progress-label"><span>${woIdx} / ${Math.min(woSession.length, woCount===999?woSession.length:woCount)}</span><span>${pct}%</span></div>
+    <div class="wo-progress-bar"><div class="wo-progress-fill ${item.type==='fill'?'fill':isTest?'test':'recall'}" style="width:${pct}%"></div></div>
+  </div>`;
+
+  const statsBar = `
+  <div class="wo-stats" style="margin-bottom:1rem;">
+    <div class="wo-stat correct"><div class="wo-stat-num">${woCorrect}</div><div class="wo-stat-lbl">Correct</div></div>
+    <div class="wo-stat wrong"><div class="wo-stat-num">${woWrong}</div><div class="wo-stat-lbl">Wrong</div></div>
+    <div class="wo-stat streak"><div class="wo-stat-num">${getWoStreak()}</div><div class="wo-stat-lbl">Streak</div></div>
+  </div>`;
+
+  if (item.type === 'fill') {
+    c.innerHTML = `<div class="workout-wrap">${statsBar}${progressHTML}
+    <div class="wo-card" id="woCard">
+      <div class="wo-card-stripe" style="background:linear-gradient(90deg,var(--teal),var(--teal2))"></div>
+      <div class="wo-card-body">
+        <div class="wo-phase fill"><span class="wo-phase-dot"></span>Fill in the Blank</div>
+        <div class="wo-prompt-label">Complete the sentence:</div>
+        <div class="wo-sentence">${item.sentence.replace('___','<span class="wo-blank" id="woBlank">___</span>')}</div>
+        <div class="wo-hint">Turkish: <strong>${item.wordObj.turkish||'—'}</strong></div>
+        <div class="wo-input-wrap">
+          <input class="wo-input" id="woInput" type="text" placeholder="Fill in the blank..." autocomplete="off" autocorrect="off" spellcheck="false"/>
+          <button class="wo-submit" onclick="checkFill()">Check →</button>
+        </div>
+        <div class="wo-feedback" id="woFeedback"></div>
+        <div class="wo-actions" id="woActions" style="display:none">
+          <button class="wo-skip-btn" onclick="skipItem()">Skip</button>
+          <button class="btn btn-primary" onclick="nextItem()">Continue →</button>
+        </div>
+      </div>
+    </div></div>`;
+    focusInput('checkFill');
+
+  } else if (woMode === 'mc') {
+    const opts = item.mcOptions || (item.mcOptions = buildMCOptions(item.answer, woSession));
+    c.innerHTML = `<div class="workout-wrap">${statsBar}${progressHTML}
+    <div class="wo-card" id="woCard">
+      <div class="wo-card-stripe" style="background:linear-gradient(90deg,var(--amber),var(--amber2))"></div>
+      <div class="wo-card-body">
+        <div class="wo-phase mc"><span class="wo-phase-dot"></span>Multiple Choice</div>
+        <div class="wo-level"><span class="wo-level-lbl">Level ${srs.level}/5</span><div class="wo-level-pips">${pips}</div></div>
+        <div class="wo-prompt-label">${item.promptLabel}</div>
+        <div class="wo-prompt-text">${item.prompt}</div>
+        ${item.definition?`<div class="wo-prompt-sub">${item.definition}</div>`:''}
+        <div class="wo-mc-options" id="woMcOpts">
+          ${opts.map((o,i)=>`<button class="wo-mc-btn" id="mc${i}" onclick="checkMC('${o.replace(/'/g,"\\'")}',${i})">${o}</button>`).join('')}
+        </div>
+        <div class="wo-feedback" id="woFeedback"></div>
+        <div class="wo-actions" id="woActions" style="display:none">
+          <button class="wo-skip-btn" onclick="skipItem()">Skip</button>
+          <button class="btn btn-primary" onclick="nextItem()">Continue →</button>
+        </div>
+      </div>
+    </div></div>`;
+
+  } else {
+    // practice or test
+    const phaseClass = isTest ? 'test' : 'recall';
+    const phaseLabel = isTest ? 'Test' : 'Active Recall';
+    c.innerHTML = `<div class="workout-wrap">${statsBar}${progressHTML}
+    <div class="wo-card" id="woCard">
+      <div class="wo-card-stripe"></div>
+      <div class="wo-card-body">
+        <div class="wo-phase ${phaseClass}"><span class="wo-phase-dot"></span>${phaseLabel}</div>
+        <div class="wo-level"><span class="wo-level-lbl">Level ${srs.level}/5</span><div class="wo-level-pips">${pips}</div></div>
+        <div class="wo-prompt-label">${item.promptLabel}</div>
+        <div class="wo-prompt-text">${item.prompt}</div>
+        ${item.definition?`<div class="wo-prompt-sub">${item.definition}</div>`:''}
+        ${!isTest ? `<div class="wo-hint">Hint: <strong>${item.word.length}</strong> letters &nbsp;·&nbsp; starts with <strong>"${item.word[0].toUpperCase()}"</strong></div>` : ''}
+        <div class="wo-input-wrap">
+          <input class="wo-input" id="woInput" type="text" placeholder="${isTest?'Type your answer...':'Type the English word...'}" autocomplete="off" autocorrect="off" spellcheck="false"/>
+          <button class="wo-submit ${isTest?'test':''}" onclick="checkRecall()">Check →</button>
+        </div>
+        <div class="wo-feedback" id="woFeedback"></div>
+        <div class="wo-actions" id="woActions" style="display:none">
+          ${!isTest?`<button class="wo-skip-btn" onclick="skipItem()">Skip</button>`:''}
+          <button class="btn btn-primary" onclick="nextItem()">Continue →</button>
+        </div>
+      </div>
+    </div></div>`;
+    focusInput('checkRecall');
+  }
+
+  woAnswered = false;
+}
+
+function focusInput(checkFn) {
+  setTimeout(() => {
+    const inp = document.getElementById('woInput');
+    if (!inp) return;
+    inp.focus();
+    inp.onkeydown = e => {
+      if (e.key==='Enter' && !woAnswered) window[checkFn]();
+      else if (e.key==='Enter' && woAnswered) nextItem();
+    };
+  }, 80);
+}
+
+function setWoMode(m) { woMode = m; renderWorkout(); }
+
+function startWorkout() {
+  if (!words.length) return;
+  const pool = buildItemPool(woSource);
+  if (!pool.length) { showToast('No words available for this source.'); return; }
+  const shuffled = pool.sort(()=>Math.random()-0.5);
+  woSession = woCount === 999 ? shuffled : shuffled.slice(0, woCount);
+  woIdx = 0; woCorrect = 0; woWrong = 0; woAnswered = false;
+  woActive = true;
+  woElapsed = 0;
+  startTimer();
+  renderWorkout();
+}
+
+function normalize(s) { return s.trim().toLowerCase().replace(/[^a-z\s\-]/g,''); }
+
+function checkRecall() {
+  if (woAnswered) return;
+  const inp = document.getElementById('woInput');
+  const fb  = document.getElementById('woFeedback');
+  if (!inp || !fb) return;
+  const answer = inp.value.trim();
+  if (!answer) { inp.focus(); return; }
+  const item = woSession[woIdx];
+  const ok = normalize(answer) === normalize(item.answer);
+  inp.classList.add(ok ? 'correct' : 'wrong');
+  document.getElementById('woCard')?.classList.add(ok ? 'correct' : 'wrong');
+  if (ok) {
+    fb.className = 'wo-feedback correct';
+    fb.innerHTML = `✓ Correct! <strong>${item.answer}</strong>${item.definition?' — '+item.definition:''}`;
+    woCorrect++;
+  } else {
+    fb.className = 'wo-feedback wrong';
+    fb.innerHTML = `✗ The answer was: <strong>${item.answer}</strong>${item.wordObj?.turkish?' — '+item.wordObj.turkish:''}`;
+    woWrong++;
+    trackError(item.srsKey);
+  }
+  advanceSRS(item.srsKey, ok);
+  woAnswered = true;
+  document.getElementById('woActions').style.display = 'flex';
+}
+
+function checkFill() {
+  if (woAnswered) return;
+  const inp = document.getElementById('woInput');
+  const fb  = document.getElementById('woFeedback');
+  if (!inp || !fb) return;
+  const answer = inp.value.trim();
+  if (!answer) { inp.focus(); return; }
+  const item = woSession[woIdx];
+  const ok = normalize(answer) === normalize(item.answer);
+  inp.classList.add(ok ? 'correct' : 'wrong');
+  document.getElementById('woCard')?.classList.add(ok ? 'correct' : 'wrong');
+  const blank = document.getElementById('woBlank');
+  if (blank) { blank.textContent = answer; blank.className = 'wo-blank '+(ok?'filled-correct':'filled-wrong'); }
+  if (ok) {
+    fb.className = 'wo-feedback correct';
+    fb.innerHTML = `✓ Perfect! You used <strong>${item.answer}</strong> correctly in context.`;
+    woCorrect++;
+  } else {
+    fb.className = 'wo-feedback wrong';
+    fb.innerHTML = `✗ The answer was: <strong>${item.answer}</strong>`;
+    woWrong++;
+    trackError(item.srsKey);
+  }
+  advanceSRS(item.srsKey, ok);
+  woAnswered = true;
+  document.getElementById('woActions').style.display = 'flex';
+}
+
+function checkMC(selected, btnIdx) {
+  if (woAnswered) return;
+  const item = woSession[woIdx];
+  const ok = normalize(selected) === normalize(item.answer);
+  const btns = document.querySelectorAll('.wo-mc-btn');
+  btns.forEach(b => b.disabled = true);
+  btns[btnIdx].classList.add(ok ? 'correct' : 'wrong');
+  if (!ok) {
+    btns.forEach((b,i) => { if (normalize(item.mcOptions[i]) === normalize(item.answer)) b.classList.add('reveal'); });
+  }
+  document.getElementById('woCard')?.classList.add(ok ? 'correct' : 'wrong');
+  const fb = document.getElementById('woFeedback');
+  if (fb) {
+    fb.className = 'wo-feedback '+(ok?'correct':'wrong');
+    fb.innerHTML = ok ? `✓ Correct! <strong>${item.answer}</strong>${item.definition?' — '+item.definition:''}` : `✗ The answer was: <strong>${item.answer}</strong>`;
+  }
+  if (ok) woCorrect++; else { woWrong++; trackError(item.srsKey); }
+  advanceSRS(item.srsKey, ok);
+  woAnswered = true;
+  document.getElementById('woActions').style.display = 'flex';
+}
+
+function nextItem() {
+  woIdx++;
+  woAnswered = false;
+  renderWorkout();
+}
+
+function skipItem() {
+  woSession.push(woSession[woIdx]); // move to end
+  woIdx++;
+  woAnswered = false;
+  renderWorkout();
+}
+
+function finishWorkout() {
+  stopTimer();
+  woActive = false;
+  updateStreak();
+  const total = woCorrect + woWrong;
+  const acc = total ? Math.round(woCorrect/total*100) : 0;
+  saveScore(woMode, woCorrect, woWrong, woSource);
+  const c = document.getElementById('workoutContainer');
+  if (!c) return;
+  c.innerHTML = `<div class="workout-wrap">
+  <div class="wo-done">
+    <div class="wo-done-emoji">${acc===100?'🏆':acc>=80?'🎉':acc>=60?'✅':'💪'}</div>
+    <div class="wo-done-title">${acc===100?'Perfect Score!':acc>=80?'Excellent!':acc>=60?'Good job!':'Keep going!'}</div>
+    <div class="wo-done-sub">${woMode==='test'?'Test complete':'Practice session complete'}</div>
+    <div class="wo-done-accuracy">${acc}%</div>
+    <div class="wo-done-acc-lbl">Accuracy</div>
+    <div class="wo-done-stats">
+      <div class="wo-done-stat"><div class="wo-done-stat-num" style="color:var(--teal2)">${woCorrect}</div><div class="wo-done-stat-lbl">Correct</div></div>
+      <div class="wo-done-stat"><div class="wo-done-stat-num" style="color:var(--rose)">${woWrong}</div><div class="wo-done-stat-lbl">Wrong</div></div>
+      <div class="wo-done-stat"><div class="wo-done-stat-num">${total}</div><div class="wo-done-stat-lbl">Total</div></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      ${woWrong>0?`<button class="btn btn-primary" onclick="retryWrong()">Retry Wrong (${woWrong})</button>`:''}
+      <button class="btn" onclick="woActive=false;woSession=[];woCorrect=0;woWrong=0;renderWorkout()">Main Menu</button>
+      <button class="btn" onclick="startWorkout()">Restart</button>
+    </div>
+  </div></div>`;
+}
+
+function retryWrong() {
+  const wrongItems = woSession.slice(0, woIdx).filter((_,i) => {
+    // We track wrong by re-building from the failed ones
+    return false; // fallback: just restart
+  });
+  // simpler: restart with same settings
+  startWorkout();
+}
+
+function updateStreak() {
+  const today = new Date().toDateString();
+  const last = localStorage.getItem('wo_last_date');
+  if (last === today) return;
+  let s = parseInt(localStorage.getItem('wo_streak')||'0');
+  const yesterday = new Date(Date.now()-86400000).toDateString();
+  s = (last === yesterday) ? s+1 : 1;
+  localStorage.setItem('wo_streak', s);
+  localStorage.setItem('wo_last_date', today);
+}
+
+/* ══════════════════════════════════════════════
+   WORD SELECTION — TEXT & DEFINITION
+══════════════════════════════════════════════ */
+let selPopoverWord = '';
+
+function openSelPopover(word, x, y) {
+  const pop = document.getElementById('selPopover');
+  const wordEl = document.getElementById('selPopoverWord');
+  const addBtn = document.getElementById('selPopoverAdd');
+  if (!pop || !wordEl || !addBtn) return;
+
+  selPopoverWord = word;
+  wordEl.textContent = word;
+
+  const exists = words.find(w => w.word.toLowerCase() === word.toLowerCase());
+  if (exists) {
+    addBtn.textContent = '✓ Already in Word List';
+    addBtn.className = 'sel-popover-btn exists';
+    addBtn.onclick = null;
+  } else {
+    addBtn.textContent = '+ Add to Word List';
+    addBtn.className = 'sel-popover-btn add';
+    addBtn.onclick = addSelectedWord;
+  }
+
+  // position
+  pop.classList.add('open');
+  const pw = pop.offsetWidth || 170, ph = pop.offsetHeight || 90;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  pop.style.left = Math.min(x, vw - pw - 12) + 'px';
+  pop.style.top  = (y + ph + 10 > vh ? y - ph - 8 : y + 8) + 'px';
+
+  setTimeout(() => document.addEventListener('click', closeSelOnOutside, {once:true}), 50);
+}
+
+function closeSelPopover() {
+  document.getElementById('selPopover')?.classList.remove('open');
+  selPopoverWord = '';
+  document.removeEventListener('click', closeSelOnOutside);
+}
+
+function closeSelOnOutside(e) {
+  if (!document.getElementById('selPopover')?.contains(e.target)) closeSelPopover();
+}
+
+function addSelectedWord() {
+  const word = selPopoverWord.trim();
+  if (!word) return;
+  closeSelPopover();
+  // open word modal pre-filled
+  openWordModal({ word });
+  showToast(`"${word}" — fill in the details and save!`);
+}
+
+/* ── AI Auto-Flashcard from selected word ── */
+async function addSelectedWord() {
+  const word = selPopoverWord.trim();
+  if (!word) return;
+  closeSelPopover();
+
+  // Show loading toast
+  showToast(`✦ Creating flashcard for "${word}"…`);
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 600,
+        messages: [{ role: 'user', content: `You are a vocabulary assistant for an Industrial Engineering student learning English.
+
+Create a complete flashcard entry for the English word: "${word}"
+
+Return ONLY valid JSON, no markdown:
+{
+  "word": "${word}",
+  "type": "noun|verb|adjective|adverb|phrasal verb",
+  "definition": "One clear simple sentence explaining the word (max 15 words)",
+  "synonyms": "3-5 synonyms, each followed by | and Turkish translation, comma-separated. Example: improve | geliştirmek, enhance | iyileştirmek",
+  "family": "3-5 related word forms with type in parentheses then | then Turkish. Example: efficient (adj) | verimli, efficiency (n) | verimlilik",
+  "examples": ["Engineering-relevant example sentence 1.", "Engineering-relevant example sentence 2."]
+}` }]
+      })
+    });
+    const data = await response.json();
+    const raw = data.content.map(c => c.text || '').join('').replace(/```json|```/g, '').trim();
+    const entry = JSON.parse(raw);
+
+    // Validate
+    if (!entry.word) throw new Error('Invalid response');
+
+    // Save to word list
+    const exists = words.find(w => w.word.toLowerCase() === entry.word.toLowerCase());
+    if (exists) { showToast(`"${word}" is already in your Word List.`); return; }
+
+    words.push({
+      word:     entry.word,
+      type:     entry.type     || '',
+      turkish:  '',
+      definition: entry.definition || '',
+      family:   entry.family   || '',
+      synonyms: entry.synonyms || '',
+      examples: Array.isArray(entry.examples) ? entry.examples : []
+    });
+    current = words.length - 1;
+    saveAll();
+    renderCard();
+    renderList();
+    showToast(`✓ "${entry.word}" added with full flashcard!`);
+
+  } catch (err) {
+    console.error(err);
+    // Fallback: open modal pre-filled
+    openWordModal({ word });
+    showToast(`Couldn't auto-fill — complete the details manually.`);
+  }
+}
+
+// Text content: mouseup to detect selection
+document.addEventListener('mouseup', e => {
+  const textContent = document.getElementById('textContent');
+  if (!textContent || !textContent.contains(e.target)) return;
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed) return;
+  const raw = sel.toString().trim();
+  if (!raw || !/^[a-zA-Z'-]+$/.test(raw) || raw.length < 2) return;
+  const word = raw.replace(/^['-]+|['-]+$/g, '');
+  if (!word) return;
+  sel.removeAllRanges();
+  openSelPopover(word, e.clientX, e.clientY);
+});
+
+// Definition word click handler
+function onDefWordClick(word, e) {
+  e.stopPropagation();
+  openSelPopover(word, e.clientX, e.clientY);
+}
+
+/* ══════════════════════════════════════════════
+   FEATURE 1 — LISTENING MODE (Web Speech API)
+══════════════════════════════════════════════ */
+function speakWord(word) {
+  if (!window.speechSynthesis) return;
+  const utt = new SpeechSynthesisUtterance(word);
+  utt.lang = 'en-US';
+  utt.rate = 0.85;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utt);
+}
+
+/* ══════════════════════════════════════════════
+   FEATURE 2 — WRITING PROMPT (AI sentence eval)
+══════════════════════════════════════════════ */
+const SK_WRITING = 'sadik_writing_v1';
+let writingHistory = JSON.parse(localStorage.getItem(SK_WRITING) || '[]');
+
+function saveWriting() { localStorage.setItem(SK_WRITING, JSON.stringify(writingHistory)); }
+
+function openWritingPrompt(wordObj) {
+  const overlay = document.createElement('div');
+  overlay.id = 'writingOverlay';
+  overlay.style.cssText = `position:fixed;inset:0;background:rgba(15,25,60,0.5);z-index:300;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);`;
+  overlay.innerHTML = `
+  <div style="background:#fff;border-radius:18px;border:1px solid #dde3f0;box-shadow:0 8px 40px rgba(26,39,68,0.18);padding:2rem;max-width:520px;width:90%;font-family:'Inter',sans-serif;max-height:90vh;overflow-y:auto;">
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:#8a96b0;font-weight:600;margin-bottom:4px;">Writing Practice</div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;color:#1a2744;margin-bottom:6px;">${wordObj.word}</div>
+    <div style="font-size:13px;color:#4a5878;margin-bottom:1.25rem;font-style:italic;">${wordObj.definition || wordObj.turkish || ''}</div>
+    <div style="font-size:13px;color:#1a2744;margin-bottom:8px;font-weight:500;">Write a sentence using this word:</div>
+    <textarea id="writingInput" style="width:100%;padding:10px 14px;font-size:14px;font-family:'Inter',sans-serif;border:2px solid #dde3f0;border-radius:10px;background:#f4f6fb;color:#1a2744;outline:none;resize:vertical;min-height:80px;transition:border-color 0.15s;" placeholder="Type your sentence here…" oninput="this.style.borderColor='#3a6fd8'"></textarea>
+    <div id="writingFeedback" style="display:none;margin-top:1rem;padding:12px 16px;border-radius:10px;font-size:14px;line-height:1.65;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem;">
+      <button onclick="closeWritingPrompt()" style="font-family:'Inter',sans-serif;font-size:13px;padding:8px 18px;border-radius:8px;border:1px solid #c2cce0;background:transparent;color:#1a2744;cursor:pointer;">Close</button>
+      <button id="writingSubmitBtn" onclick="submitWriting('${wordObj.word.replace(/'/g,"\\'")}','${(wordObj.definition||'').replace(/'/g,"\\'")}')" style="font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:8px 20px;border-radius:8px;border:none;background:#2451a6;color:#fff;cursor:pointer;">Evaluate with AI ✦</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('writingInput')?.focus(), 80);
+}
+
+function closeWritingPrompt() {
+  document.getElementById('writingOverlay')?.remove();
+}
+
+async function submitWriting(word, definition) {
+  const inp = document.getElementById('writingInput');
+  const fb  = document.getElementById('writingFeedback');
+  const btn = document.getElementById('writingSubmitBtn');
+  if (!inp || !fb) return;
+  const sentence = inp.value.trim();
+  if (!sentence) { inp.focus(); return; }
+  btn.textContent = 'Evaluating…'; btn.disabled = true;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:400,
+        messages:[{ role:'user', content:`Evaluate this English sentence written by a Turkish engineering student.
+Word used: "${word}" (${definition})
+Student's sentence: "${sentence}"
+
+Give brief feedback (2-3 sentences) on:
+1. Grammar correctness
+2. Natural usage of "${word}"
+3. One specific improvement suggestion if needed
+
+End with "Score: X/10". Be encouraging and constructive. Reply in English.` }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content.map(c=>c.text||'').join('');
+    fb.style.display = 'block';
+    const score = text.match(/Score:\s*(\d+)\/10/i)?.[1];
+    const isGood = score && parseInt(score) >= 7;
+    fb.style.cssText = `display:block;margin-top:1rem;padding:12px 16px;border-radius:10px;font-size:14px;line-height:1.65;background:${isGood?'#f0fdf4':'#fef9ec'};border:1px solid ${isGood?'#bbf7d0':'#fde68a'};color:${isGood?'#14532d':'#78350f'};`;
+    fb.innerHTML = text.replace(/\n/g,'<br>');
+    writingHistory.unshift({ word, sentence, feedback:text, date:Date.now() });
+    if (writingHistory.length > 100) writingHistory.pop();
+    saveWriting();
+    btn.textContent = '✓ Evaluated'; btn.disabled = false;
+  } catch(err) {
+    fb.style.cssText = 'display:block;margin-top:1rem;padding:12px 16px;border-radius:10px;font-size:14px;background:#fff1f2;border:1px solid #fecdd3;color:#881337;';
+    fb.textContent = 'Evaluation failed. Check your connection.';
+    btn.textContent = 'Evaluate with AI ✦'; btn.disabled = false;
+  }
+}
+
+/* ══════════════════════════════════════════════
+   FEATURE 5 — WEAK WORDS REPORT
+══════════════════════════════════════════════ */
+const SK_ERRORS = 'sadik_errors_v1';
+let errorMap = JSON.parse(localStorage.getItem(SK_ERRORS) || '{}');
+// errorMap[wordKey] = count of wrong answers
+
+function trackError(wordKey) {
+  errorMap[wordKey] = (errorMap[wordKey] || 0) + 1;
+  localStorage.setItem(SK_ERRORS, JSON.stringify(errorMap));
+}
+
+function getWeakWords(n = 10) {
+  return Object.entries(errorMap)
+    .sort((a,b) => b[1]-a[1])
+    .slice(0, n)
+    .map(([k, count]) => ({ word: words.find(w=>w.word.toLowerCase()===k) || {word:k}, count }));
+}
+
+/* ══════════════════════════════════════════════
+   FEATURE 6 — SCORE HISTORY
+══════════════════════════════════════════════ */
+const SK_SCORES = 'sadik_scores_v1';
+let scoreHistory = JSON.parse(localStorage.getItem(SK_SCORES) || '[]');
+// [{date, mode, correct, wrong, total, accuracy, source}]
+
+function saveScore(mode, correct, wrong, source) {
+  scoreHistory.unshift({ date:Date.now(), mode, correct, wrong, total:correct+wrong, accuracy:correct+wrong?Math.round(correct/(correct+wrong)*100):0, source });
+  if (scoreHistory.length > 200) scoreHistory.pop();
+  localStorage.setItem(SK_SCORES, JSON.stringify(scoreHistory));
+}
+
+/* ══════════════════════════════════════════════
+   READING — FULL ENGINE
+══════════════════════════════════════════════ */
+
+const RD_TOPICS = [
+  { value:'industrial-engineering', label:'Industrial Engineering' },
+  { value:'production-planning',    label:'Production & Planning' },
+  { value:'scheduling',             label:'Scheduling & Optimization' },
+  { value:'machine-engineering',    label:'Machine & Mechanical Eng.' },
+  { value:'supply-chain',           label:'Supply Chain & Logistics' },
+  { value:'quality-control',        label:'Quality Control & Lean' },
+  { value:'battery-manufacturing',  label:'Battery Manufacturing' },
+  { value:'workplace-english',      label:'Workplace & Business English' },
+  { value:'daily-english',          label:'Daily Life & General English' },
+  { value:'technology',             label:'Technology & Innovation' },
+];
+
+let rdActiveIdx   = -1;   // index in readings[] currently displayed
+let rdQuizAnswers = {};   // {qIdx: selectedAnswer}
+let rdQuizDone    = false;
+let rdPopupWord   = '';
+let rdPopupData   = null; // cached AI lookup result
+
+function saveReadings() { localStorage.setItem(SK_READINGS, JSON.stringify(readings)); }
+
+/* ── Main render ── */
+function renderReading() {
+  const c = document.getElementById('readingContainer');
+  if (!c) return;
+
+  const topicOpts = RD_TOPICS.map(t =>
+    `<option value="${t.value}">${t.label}</option>`).join('');
+
+  const savedListHTML = readings.length
+    ? readings.map((r, i) => `
+      <div class="rd-saved-entry ${rdActiveIdx===i?'active':''}" onclick="loadReading(${i})">
+        <button class="rd-saved-del" onclick="event.stopPropagation();deleteReading(${i})">×</button>
+        <div class="rd-saved-title">${r.title}</div>
+        <div class="rd-saved-meta">
+          <span>${r.level||'B1-B2'}</span>
+          <span>${r.wordCount||0} words</span>
+          <span>${new Date(r.date).toLocaleDateString('tr-TR')}</span>
+        </div>
+      </div>`).join('')
+    : `<div class="rd-no-saved">No readings yet.<br>Generate your first text!</div>`;
+
+  const articleHTML = rdActiveIdx >= 0 && readings[rdActiveIdx]
+    ? buildArticleHTML(readings[rdActiveIdx])
+    : `<div class="rd-article-card" style="padding:3rem 2rem;text-align:center;color:var(--text3);">
+        <div style="font-size:40px;margin-bottom:1rem;">📖</div>
+        <div style="font-size:15px;font-weight:500;color:var(--navy);margin-bottom:6px;">Generate or select a reading</div>
+        <div style="font-size:13px;">Choose a topic and click Generate to start reading.</div>
+      </div>`;
+
+  c.innerHTML = `
+  <div class="rd-layout">
+    <div class="rd-panel">
+      <div class="rd-panel-header">
+        <h3>Saved Readings</h3>
+        <span style="font-size:11px;color:var(--text3)">${readings.length}</span>
+      </div>
+      <div class="rd-saved-list">${savedListHTML}</div>
+    </div>
+
+    <div class="rd-right">
+      <div class="rd-gen-card">
+        <div class="rd-gen-top">
+          <select class="rd-topic-select" id="rdTopicSel">${topicOpts}</select>
+          <select class="rd-level-select" id="rdLevelSel">
+            <option value="A2-B1">A2–B1 (Easy)</option>
+            <option value="B1-B2" selected>B1–B2 (Medium)</option>
+            <option value="B2-C1">B2–C1 (Advanced)</option>
+          </select>
+          <button class="rd-gen-btn" id="rdGenBtn" onclick="generateReading()">
+            <span>✦</span> Generate New Story
+          </button>
+        </div>
+      </div>
+
+      ${articleHTML}
+    </div>
+  </div>`;
+}
+
+function buildArticleHTML(r) {
+  const knownSet = new Set((words||[]).map(w => w.word.toLowerCase()));
+  // render text: wrap each word
+  const rendered = renderReadingText(r.text, knownSet);
+  const knownInText = countKnownInText(r.text, knownSet);
+
+  // quiz
+  const quizHTML = r.quiz && r.quiz.length ? buildQuizHTML(r.quiz) : '';
+
+  return `
+  <div class="rd-article-card">
+    <div class="rd-article-header">
+      <div>
+        <div class="rd-article-title">${r.title}</div>
+        <div class="rd-article-meta">
+          <span class="rd-meta-pill level">${r.level||'B1-B2'}</span>
+          <span class="rd-meta-pill topic">${RD_TOPICS.find(t=>t.value===r.topic)?.label||r.topic}</span>
+          <span class="rd-meta-pill words">${r.wordCount} words</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="btn btn-sm" onclick="deleteReading(${rdActiveIdx})" style="color:var(--rose);border-color:#f0c0c8;">Delete</button>
+      </div>
+    </div>
+    <div class="rd-article-body">
+      <div class="rd-text" id="rdText">${rendered}</div>
+    </div>
+    <div class="rd-audio-bar" id="rdAudioBar">
+      <div class="rd-audio-top">
+        <div class="rd-audio-title">🔊 Listen to this article</div>
+        <div class="rd-audio-modes">
+          <button class="rd-mode-pill active" id="rdMode_simple"   onclick="setRdMode('simple')">🐢 Simple</button>
+          <button class="rd-mode-pill"        id="rdMode_normal"   onclick="setRdMode('normal')">📖 Normal</button>
+          <button class="rd-mode-pill"        id="rdMode_advanced" onclick="setRdMode('advanced')">🚀 Advanced</button>
+          <button class="rd-mode-pill"        id="rdMode_shadowing" onclick="setRdMode('shadowing')">🎯 Shadowing</button>
+        </div>
+      </div>
+      <div class="rd-audio-controls">
+        <button class="rd-play-btn" id="rdPlayBtn" onclick="toggleRdPlay()">▶</button>
+        <div class="rd-progress-track" id="rdProgressTrack" onclick="seekRd(event)">
+          <div class="rd-progress-fill" id="rdProgressFill" style="width:0%"></div>
+        </div>
+        <div class="rd-time" id="rdTimeDisplay">0:00 / 0:00</div>
+      </div>
+      <div class="rd-audio-options">
+        <span class="rd-speed-lbl">Speed:</span>
+        <input type="range" class="rd-speed-range" id="rdSpeedRange" min="0.5" max="1.8" step="0.1" value="0.85" oninput="updateRdSpeed(this.value)">
+        <span class="rd-speed-val" id="rdSpeedVal">0.85×</span>
+        <select class="rd-voice-sel" id="rdVoiceSel" onchange="rdChangeVoice(this.value)">
+          <option value="">Default voice</option>
+        </select>
+      </div>
+      <div id="rdModeDesc" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;">Simple: slow pace, clear pronunciation — ideal for beginners</div>
+    </div>
+    <div class="rd-article-stats">
+      <div class="rd-stat-item">📖 <strong>${r.wordCount}</strong> words</div>
+      <div class="rd-stat-item">🟣 <strong>${knownInText}</strong> words you know</div>
+      <div class="rd-stat-item">📅 ${new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+    </div>
+  </div>
+  ${quizHTML}`;
+}
+
+function renderReadingText(text, knownSet) {
+  // Split into words, preserve punctuation + whitespace
+  return text.replace(/([a-zA-Z'-]{2,})/g, (match, word) => {
+    const clean = word.replace(/^['-]+|['-]+$/g,'').toLowerCase();
+    if (!clean || clean.length < 2) return match;
+    const isKnown = knownSet.has(clean);
+    const cls = isKnown ? 'rd-known' : 'rd-word';
+    const title = isKnown ? 'In your Word List' : '';
+    return `<span class="${cls}" data-word="${clean}" onclick="rdWordClick('${clean.replace(/'/g,"\\'")}',event)" ${title?`title="${title}"`:''}>${match}</span>`;
+  });
+}
+
+function countKnownInText(text, knownSet) {
+  const wordMatches = [...text.matchAll(/\b([a-zA-Z'-]{2,})\b/g)];
+  const unique = new Set(wordMatches.map(m => m[1].replace(/^['-]+|['-]+$/g,'').toLowerCase()));
+  return [...unique].filter(w => knownSet.has(w)).length;
+}
+
+function buildQuizHTML(quiz) {
+  const questionsHTML = quiz.map((q, qi) => {
+    const optsHTML = q.options.map((opt, oi) => {
+      let cls = 'rd-opt';
+      if (rdQuizDone) {
+        if (opt === q.answer) cls += ' correct';
+        else if (rdQuizAnswers[qi] === opt && opt !== q.answer) cls += ' wrong';
+      }
+      return `<button class="${cls}" ${rdQuizDone?'disabled':''} onclick="rdAnswerQ(${qi},'${opt.replace(/'/g,"\\'")}',${JSON.stringify(q.answer).replace(/'/g,"\\'")})">${opt}</button>`;
+    }).join('');
+    return `<div class="rd-q">
+      <div class="rd-q-text"><span class="rd-q-num">${qi+1}</span>${q.question}</div>
+      <div class="rd-opts">${optsHTML}</div>
+    </div>`;
+  }).join('');
+
+  let resultHTML = '';
+  if (rdQuizDone) {
+    const correct = quiz.filter((q,i) => rdQuizAnswers[i] === q.answer).length;
+    const pct = Math.round(correct/quiz.length*100);
+    resultHTML = `<div class="rd-quiz-result">
+      <div class="rd-quiz-score" style="color:${pct>=80?'#22c55e':pct>=60?'#f59e0b':'#f43f5e'}">${correct}/${quiz.length}</div>
+      <div class="rd-quiz-lbl">${pct>=80?'Excellent comprehension!':pct>=60?'Good understanding!':'Keep reading and try again!'}</div>
+    </div>`;
+  }
+
+  return `<div class="rd-quiz-card">
+    <div class="rd-quiz-header">
+      <h3>📝 Comprehension Quiz</h3>
+      ${!rdQuizDone ? `<button class="btn btn-sm btn-primary" onclick="submitRdQuiz(${JSON.stringify(quiz).replace(/"/g,'&quot;')})">Submit Quiz</button>` : `<button class="btn btn-sm" onclick="retryRdQuiz()">Retry</button>`}
+    </div>
+    <div class="rd-quiz-body">
+      ${questionsHTML}
+      ${resultHTML}
+    </div>
+  </div>`;
+}
+
+function rdAnswerQ(qi, selected) {
+  if (rdQuizDone) return;
+  rdQuizAnswers[qi] = selected;
+  // highlight selected option
+  const opts = document.querySelectorAll(`.rd-q:nth-child(${qi+1}) .rd-opt`);
+  opts.forEach(b => b.style.borderColor = b.textContent.trim() === selected ? 'var(--blue2)' : '');
+}
+
+function submitRdQuiz(quiz) {
+  rdQuizDone = true;
+  if (rdActiveIdx >= 0) buildArticleHTML(readings[rdActiveIdx]); // re-render triggers via renderReading
+  renderReading();
+}
+
+function retryRdQuiz() {
+  rdQuizAnswers = {};
+  rdQuizDone = false;
+  renderReading();
+}
+
+function loadReading(i) {
+  rdActiveIdx = i;
+  rdQuizAnswers = {};
+  rdQuizDone = false;
+  renderReading();
+}
+
+function deleteReading(i) {
+  readings.splice(i, 1);
+  if (rdActiveIdx === i) rdActiveIdx = readings.length > 0 ? 0 : -1;
+  else if (rdActiveIdx > i) rdActiveIdx--;
+  saveReadings();
+  renderReading();
+}
+
+/* ── Generate via AI ── */
+async function generateReading() {
+  const btn = document.getElementById('rdGenBtn');
+  const topicSel = document.getElementById('rdTopicSel');
+  const levelSel = document.getElementById('rdLevelSel');
+  if (!btn) return;
+
+  const topic = topicSel?.value || 'industrial-engineering';
+  const level = levelSel?.value || 'B1-B2';
+  const topicLabel = RD_TOPICS.find(t=>t.value===topic)?.label || topic;
+
+  const knownWords = words.map(w=>w.word).slice(0,30).join(', ');
+
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner"></span> Generating…`;
+
+  // Show loading state
+  const right = document.querySelector('.rd-right');
+  if (right) {
+    const genCard = right.querySelector('.rd-gen-card');
+    const existing = right.querySelector('.rd-article-card, .rd-quiz-card, [class*="rd-generating"]');
+    if (existing) existing.remove();
+    const loadDiv = document.createElement('div');
+    loadDiv.className = 'rd-article-card rd-generating';
+    loadDiv.innerHTML = `<div class="rd-gen-anim">📖</div><div style="font-size:15px;font-weight:500;color:var(--navy);margin-bottom:6px;">Writing your article…</div><div style="font-size:13px;">AI is crafting a ${level} level text on ${topicLabel}</div>`;
+    right.appendChild(loadDiv);
+  }
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1800,
+        messages: [{ role: 'user', content: `You are an English teacher creating reading materials for a Turkish Industrial Engineering student (Sadık) at ${level} level.
+
+Write a COMPLETE reading passage about: ${topicLabel}
+${topic === 'daily-english' || topic === 'workplace-english' ? 'Include natural conversational English and practical everyday phrases.' : 'Use technical but accessible vocabulary appropriate for engineering students.'}
+
+Requirements:
+- Length: 180-280 words (count carefully)
+- Level: ${level}
+- Naturally include some of these words the student already knows (if relevant): ${knownWords}
+- Engaging, informative, with a clear structure
+- Use varied sentence structures
+
+Then create exactly 5 multiple-choice comprehension questions about the text.
+
+Respond ONLY with valid JSON, no markdown:
+{
+  "title": "Catchy article title (max 8 words)",
+  "text": "Full article text here. Use \\n\\n for paragraph breaks.",
+  "wordCount": 220,
+  "quiz": [
+    {
+      "question": "Question text?",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "answer": "Option A"
+    }
+  ]
+}` }]
+      })
+    });
+
+    const data = await response.json();
+    const raw = data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(raw);
+
+    const newReading = {
+      id:        Date.now(),
+      title:     parsed.title || topicLabel,
+      topic,
+      level,
+      text:      parsed.text || '',
+      wordCount: parsed.wordCount || parsed.text?.split(/\s+/).length || 0,
+      quiz:      parsed.quiz || [],
+      date:      Date.now(),
+    };
+
+    readings.unshift(newReading);
+    if (readings.length > 50) readings.pop();
+    saveReadings();
+    rdActiveIdx = 0;
+    rdQuizAnswers = {};
+    rdQuizDone = false;
+    renderReading();
+
+  } catch(err) {
+    console.error(err);
+    showToast('Generation failed. Check your connection and try again.');
+    renderReading();
+  }
+}
+
+/* ── Word popup in reading ── */
+let rdLookupCache = {};
+
+async function rdWordClick(word, e) {
+  e.stopPropagation();
+  const pop = document.getElementById('rdWordPopup');
+  const wordEl = document.getElementById('rdPopupWord');
+  const defEl  = document.getElementById('rdPopupDef');
+  const addBtn = document.getElementById('rdPopupAdd');
+  if (!pop) return;
+
+  rdPopupWord = word;
+  wordEl.textContent = word;
+  defEl.innerHTML = '<span class="rd-popup-loading">Looking up…</span>';
+
+  // position
+  pop.classList.add('open');
+  const rect = e.currentTarget?.getBoundingClientRect() || {left:e.clientX, bottom:e.clientY};
+  const pw = 260, ph = 140;
+  const x = Math.min(rect.left, window.innerWidth - pw - 12);
+  const y = rect.bottom + 8 + ph > window.innerHeight ? rect.top - ph - 8 : rect.bottom + 8;
+  pop.style.left = x + 'px';
+  pop.style.top  = y + 'px';
+
+  // check if already in word list
+  const exists = words.find(w => w.word.toLowerCase() === word.toLowerCase());
+  if (exists) {
+    addBtn.textContent = '✓ In Word List';
+    addBtn.className = 'rd-popup-add exists';
+    addBtn.onclick = null;
+    defEl.textContent = exists.definition || exists.turkish || '—';
+  } else {
+    addBtn.textContent = '+ Add to Word List';
+    addBtn.className = 'rd-popup-add';
+    addBtn.onclick = rdAddWord;
+
+    // check cache
+    if (rdLookupCache[word]) {
+      defEl.textContent = rdLookupCache[word];
+    } else {
+      // quick AI lookup
+      try {
+        const r = await fetch('https://api.anthropic.com/v1/messages', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            model:'claude-sonnet-4-20250514', max_tokens:60,
+            messages:[{role:'user',content:`Give a very short definition of "${word}" in one sentence (max 12 words). Only the definition, no extra text.`}]
+          })
+        });
+        const d = await r.json();
+        const def = d.content.map(c=>c.text||'').join('').trim();
+        rdLookupCache[word] = def;
+        if (rdPopupWord === word) defEl.textContent = def;
+      } catch {
+        if (rdPopupWord === word) defEl.textContent = 'Definition unavailable.';
+      }
+    }
+  }
+
+  setTimeout(() => document.addEventListener('click', closeRdOnOutside, {once:true}), 50);
+}
+
+function closeRdPopup() {
+  document.getElementById('rdWordPopup')?.classList.remove('open');
+  document.removeEventListener('click', closeRdOnOutside);
+}
+
+function closeRdOnOutside(e) {
+  if (!document.getElementById('rdWordPopup')?.contains(e.target)) closeRdPopup();
+}
+
+async function rdAddWord() {
+  const word = rdPopupWord;
+  if (!word) return;
+  closeRdPopup();
+  showToast(`✦ Creating flashcard for "${word}"…`);
+
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:600,
+        messages:[{role:'user',content:`Create a flashcard for the English word: "${word}"
+Return ONLY valid JSON:
+{
+  "word": "${word}",
+  "type": "noun|verb|adjective|adverb|phrasal verb",
+  "definition": "One clear simple sentence (max 15 words)",
+  "synonyms": "3-5 synonyms with Turkish: improve | geliştirmek, enhance | iyileştirmek",
+  "family": "3-5 word forms: efficient (adj) | verimli, efficiency (n) | verimlilik",
+  "examples": ["Engineering example 1.", "Engineering example 2."]
+}`}]
+      })
+    });
+    const d = await r.json();
+    const raw = d.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    const entry = JSON.parse(raw);
+    if (words.find(w=>w.word.toLowerCase()===entry.word.toLowerCase())) { showToast(`"${word}" is already in your Word List.`); return; }
+    words.push({ word:entry.word, type:entry.type||'', turkish:'', definition:entry.definition||'', family:entry.family||'', synonyms:entry.synonyms||'', examples:Array.isArray(entry.examples)?entry.examples:[] });
+    current = words.length-1;
+    saveAll();
+    renderCard(); renderList();
+    if (document.getElementById('readingView').style.display!=='none') renderReading();
+    showToast(`✓ "${entry.word}" added with full flashcard!`);
+  } catch {
+    openWordModal({word});
+    showToast(`Couldn't auto-fill — complete manually.`);
+  }
+}
+
+/* ══════════════════════════════════════════════
+   READING AUDIO ENGINE
+══════════════════════════════════════════════ */
+
+const RD_MODES = {
+  simple: {
+    rate: 0.72, pitch: 1.0,
+    label: '🐢 Simple',
+    desc: 'Slow pace, clear pronunciation — ideal for beginners and intensive focus',
+    pauseAfterSentence: 900,
+    pauseAfterComma: 400,
+  },
+  normal: {
+    rate: 0.90, pitch: 1.0,
+    label: '📖 Normal',
+    desc: 'Natural reading speed — builds comfortable listening comprehension',
+    pauseAfterSentence: 500,
+    pauseAfterComma: 200,
+  },
+  advanced: {
+    rate: 1.15, pitch: 1.0,
+    label: '🚀 Advanced',
+    desc: 'Fast native-like pace — trains your ear for real-world English',
+    pauseAfterSentence: 300,
+    pauseAfterComma: 100,
+  },
+  shadowing: {
+    rate: 0.80, pitch: 1.0,
+    label: '🎯 Shadowing',
+    desc: 'Phrase-by-phrase with pauses — speak along to improve pronunciation',
+    pauseAfterSentence: 1400,
+    pauseAfterComma: 700,
+    pauseAfterPhrase: 600,
+  },
+};
+
+let rdMode        = 'simple';
+let rdPlaying     = false;
+let rdWordTokens  = [];   // [{word, spanIdx}]
+let rdChunks      = [];   // utterance chunks for progress
+let rdChunkIdx    = 0;
+let rdTotalChunks = 0;
+let rdSpeed       = 0.85;
+let rdVoice       = null;
+let rdVoicesList  = [];
+let rdCurrentSpan = null;
+
+// Load voices
+function loadRdVoices() {
+  rdVoicesList = speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+  const sel = document.getElementById('rdVoiceSel');
+  if (!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">Default (system)</option>' +
+    rdVoicesList.map((v,i) => `<option value="${i}">${v.name} (${v.lang})</option>`).join('');
+  if (prev) sel.value = prev;
+}
+
+if (window.speechSynthesis) {
+  speechSynthesis.onvoiceschanged = loadRdVoices;
+  setTimeout(loadRdVoices, 300);
+}
+
+function rdChangeVoice(idx) {
+  rdVoice = idx !== '' ? rdVoicesList[parseInt(idx)] : null;
+}
+
+function setRdMode(mode) {
+  rdMode = mode;
+  stopRdPlay();
+
+  // Update speed slider to match mode default
+  const modeRate = RD_MODES[mode].rate;
+  rdSpeed = modeRate;
+  const range = document.getElementById('rdSpeedRange');
+  const val   = document.getElementById('rdSpeedVal');
+  if (range) range.value = modeRate;
+  if (val)   val.textContent = modeRate + '×';
+
+  // Update pill active state
+  Object.keys(RD_MODES).forEach(m => {
+    const pill = document.getElementById(`rdMode_${m}`);
+    if (pill) pill.classList.toggle('active', m === mode);
+  });
+
+  // Update description
+  const desc = document.getElementById('rdModeDesc');
+  if (desc) desc.textContent = RD_MODES[mode].desc;
+}
+
+function updateRdSpeed(val) {
+  rdSpeed = parseFloat(val);
+  const el = document.getElementById('rdSpeedVal');
+  if (el) el.textContent = parseFloat(val).toFixed(2) + '×';
+}
+
+function toggleRdPlay() {
+  if (rdPlaying) stopRdPlay();
+  else startRdPlay();
+}
+
+function startRdPlay() {
+  if (!window.speechSynthesis) { showToast('Speech not supported in this browser.'); return; }
+  const textEl = document.getElementById('rdText');
+  if (!textEl) return;
+
+  const rawText = textEl.innerText || textEl.textContent;
+  if (!rawText.trim()) return;
+
+  speechSynthesis.cancel();
+  rdPlaying = true;
+
+  const btn = document.getElementById('rdPlayBtn');
+  if (btn) btn.textContent = '⏸';
+
+  const mode = RD_MODES[rdMode] || RD_MODES.normal;
+  const effectiveRate = rdSpeed || mode.rate;
+
+  // Split text into sentences/phrases
+  let chunks;
+  if (rdMode === 'shadowing') {
+    // phrase-by-phrase: split on commas, semicolons, sentences
+    chunks = rawText.split(/([.,;!?]+|\n)/).map(s=>s.trim()).filter(s=>s && s.length > 1 && /[a-zA-Z]/.test(s));
+  } else {
+    // sentence by sentence
+    chunks = rawText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [rawText];
+    chunks = chunks.map(s=>s.trim()).filter(Boolean);
+  }
+
+  rdChunks      = chunks;
+  rdTotalChunks = chunks.length;
+  rdChunkIdx    = 0;
+
+  speakRdChunks(chunks, effectiveRate, mode);
+}
+
+function speakRdChunks(chunks, rate, mode) {
+  if (!rdPlaying || rdChunkIdx >= chunks.length) {
+    finishRdPlay();
+    return;
+  }
+
+  const chunk = chunks[rdChunkIdx];
+  highlightRdChunk(chunk);
+
+  const utt = new SpeechSynthesisUtterance(chunk);
+  utt.lang  = 'en-US';
+  utt.rate  = rate;
+  utt.pitch = mode.pitch || 1.0;
+  if (rdVoice) utt.voice = rdVoice;
+
+  utt.onend = () => {
+    clearRdHighlight();
+    rdChunkIdx++;
+    updateRdProgress();
+
+    if (!rdPlaying) return;
+
+    // pause between chunks
+    const isSentenceEnd = /[.!?]$/.test(chunk);
+    const isCommaEnd    = /[,;]$/.test(chunk);
+    const pause = isSentenceEnd
+      ? (mode.pauseAfterSentence || 400)
+      : isCommaEnd
+        ? (mode.pauseAfterComma || 200)
+        : (mode.pauseAfterPhrase || 300);
+
+    setTimeout(() => speakRdChunks(chunks, rate, mode), pause);
+  };
+
+  utt.onerror = () => { rdChunkIdx++; speakRdChunks(chunks, rate, mode); };
+  speechSynthesis.speak(utt);
+}
+
+function highlightRdChunk(chunk) {
+  clearRdHighlight();
+  const textEl = document.getElementById('rdText');
+  if (!textEl) return;
+  const spans = textEl.querySelectorAll('.rd-word, .rd-known');
+  const chunkWords = new Set(chunk.toLowerCase().split(/\W+/).filter(Boolean));
+  // highlight first matching run of words in the text
+  let matched = 0;
+  spans.forEach(span => {
+    const w = (span.dataset.word || span.textContent).toLowerCase().replace(/\W/g,'');
+    if (chunkWords.has(w)) { span.classList.add('rd-speaking'); matched++; }
+  });
+}
+
+function clearRdHighlight() {
+  document.querySelectorAll('.rd-speaking').forEach(el => el.classList.remove('rd-speaking'));
+}
+
+function updateRdProgress() {
+  const pct = rdTotalChunks > 0 ? (rdChunkIdx / rdTotalChunks * 100) : 0;
+  const fill = document.getElementById('rdProgressFill');
+  if (fill) fill.style.width = pct + '%';
+
+  const timeEl = document.getElementById('rdTimeDisplay');
+  if (timeEl) timeEl.textContent = `${rdChunkIdx} / ${rdTotalChunks} sentences`;
+}
+
+function finishRdPlay() {
+  rdPlaying = false;
+  clearRdHighlight();
+  const btn = document.getElementById('rdPlayBtn');
+  if (btn) btn.textContent = '▶';
+  const fill = document.getElementById('rdProgressFill');
+  if (fill) fill.style.width = '100%';
+  const timeEl = document.getElementById('rdTimeDisplay');
+  if (timeEl) timeEl.textContent = '✓ Done';
+}
+
+function stopRdPlay() {
+  rdPlaying = false;
+  speechSynthesis.cancel();
+  clearRdHighlight();
+  rdChunkIdx = 0;
+  const btn = document.getElementById('rdPlayBtn');
+  if (btn) btn.textContent = '▶';
+  const fill = document.getElementById('rdProgressFill');
+  if (fill) fill.style.width = '0%';
+  const timeEl = document.getElementById('rdTimeDisplay');
+  if (timeEl) timeEl.textContent = '0:00 / 0:00';
+}
+
+function seekRd(e) {
+  const track = document.getElementById('rdProgressTrack');
+  if (!track || !rdTotalChunks) return;
+  const rect = track.getBoundingClientRect();
+  const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const targetChunk = Math.floor(pct * rdTotalChunks);
+  stopRdPlay();
+  rdChunkIdx = targetChunk;
+  rdPlaying = true;
+  const btn = document.getElementById('rdPlayBtn');
+  if (btn) btn.textContent = '⏸';
+  const mode = RD_MODES[rdMode] || RD_MODES.normal;
+  speakRdChunks(rdChunks, rdSpeed || mode.rate, mode);
+}
+
+// Stop reading when leaving reading view
+const origSwitchView = switchView;
+// Patch to stop audio on tab switch
+document.querySelectorAll('.vtab').forEach(t => {
+  t.addEventListener('click', () => { if (rdPlaying) stopRdPlay(); });
+});
+
+/* ══════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════ */
+updatePill();
 saveAll();
 renderCard();
 </script>
-<!-- NEW LIST MODAL -->
-<div class="modal-overlay" id="newListModal">
-  <div class="nl-modal">
-    <h3>New List</h3>
-    <input id="nlName" placeholder="e.g. IELTS Vocabulary, Work Terms..." maxlength="40" />
-    <div class="nl-modal-footer">
-      <button class="btn" onclick="closeNewListModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveNewList()">Create</button>
-    </div>
-  </div>
-</div>
-
-<!-- ADD TO LIST POPOVER -->
-<div class="atl-popover" id="atlPopover" style="display:none">
-  <div class="atl-popover-title">Add to list</div>
-  <div id="atlItems"></div>
-</div>
-
 </body>
 </html>
